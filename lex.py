@@ -1,8 +1,32 @@
 import ply.lex as lex
 
 reserved_words = (
+    'break',
+    'case',
+    'catch',
+    'continue',
+    'debugger',
+    'default',
+    'delete',
+    'do',
+    'else',
+    'finally',
+    'for',
+    'function',
+    'if',
+    'in',
+    'instanceof',
+    'new',
+    'return',
+    'switch',
+    'this',
+    'throw',
+    'try',
+    'typeof',
+    'var',
+    'void',
     'while',
-    'print'
+    'with',
 )
 
 tokens = (
