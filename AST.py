@@ -115,13 +115,16 @@ class OpNode(Node):
         
     def __repr__(self):
         return "%s (%s)" % (self.op, self.nbargs)
-    
+
 class AssignNode(Node):
     type = '='
-    
+
 class LogNode(Node):
     type = 'log'
-    
+
+class VariableNode(Node):
+    type='variable'
+
 class WhileNode(Node):
     type = 'while'
 
