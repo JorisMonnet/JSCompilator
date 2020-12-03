@@ -13,9 +13,9 @@ def p_statement(p):
     | structure '''
     p[0] = p[1]
 
-def p_statement_print(p):
+"""def p_statement_print(p):
     ''' statement : PRINT expression '''
-    p[0] = AST.PrintNode(p[2])
+    p[0] = AST.PrintNode(p[2])"""
 def p_structure(p):
     ''' structure : WHILE expression '{' programme '}' '''
     p[0] = AST.WhileNode([p[2],p[4]])
