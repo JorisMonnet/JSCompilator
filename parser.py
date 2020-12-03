@@ -17,13 +17,17 @@ def p_statement(p):
     | structure '''
     p[0] = p[1]
 
-"""def p_statement_print(p):
-    ''' statement : PRINT expression '''
-    p[0] = AST.PrintNode(p[2])"""
+def p_for(p):
+    '''structure : FOR '(' assignation ';' expression ';' assignation ')' '{' programme '}' '''
+    p[0]=AST.ForNode([p[3],p[5],p[7],p[10]])
+
+def p_statement_log(p):
+    ''' statement : LOG expression '''
+    p[0] = AST.LogNode(p[2])
 
 def p_structure(p):
-    ''' structure : WHILE expression '{' programme '}' '''
-    p[0] = AST.WhileNode([p[2],p[4]])
+    ''' structure : WHILE '(' expression ')' '{' programme '}' '''
+    p[0] = AST.WhileNode([p[3],p[6]])
     
 def p_expression_op(p):
     '''expression : expression ADD_OP expression
@@ -50,7 +54,7 @@ def p_assign(p):
 def p_error(p):
     if p:
         print ("Syntax error in line %d" % p.lineno)
-        yacc.errok()
+        parser.errok()
     else:
         print ("Sytax error: unexpected end of file!")
 
@@ -63,7 +67,7 @@ precedence = (
 def parse(program):
     return yacc.parse(program)
 
-yacc.yacc(outputdir='generated')
+parser = yacc.yacc(outputdir='generated')
 
 if __name__ == "__main__":
     import sys

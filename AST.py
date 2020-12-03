@@ -119,12 +119,15 @@ class OpNode(Node):
 class AssignNode(Node):
     type = '='
     
-class PrintNode(Node):
-    type = 'print'
+class LogNode(Node):
+    type = 'log'
     
 class WhileNode(Node):
     type = 'while'
-    
+
+class ForNode(Node):
+    type = 'for'
+
 class EntryNode(Node):
     type = 'ENTRY'
     def __init__(self):

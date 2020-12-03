@@ -2,7 +2,8 @@ import ply.lex as lex
 
 reserved_words = (
     'for',
-    'while'
+    'while',
+    'log'
 )
 
 tokens = (
