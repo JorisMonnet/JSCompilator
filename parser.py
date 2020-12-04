@@ -2,8 +2,6 @@ import ply.yacc as yacc
 from lex import tokens
 import AST
 
-vars = []
-
 def p_programme_statement(p):
     ''' programme : statement '''
     p[0] = AST.ProgramNode(p[1])
@@ -28,16 +26,12 @@ def p_statement_log(p):
 def p_creation(p):
     '''statement : VAR IDENTIFIER
     | LET IDENTIFIER'''
-    if(p[2] not in vars):
-        vars.append(p[2])
-        p[0] = AST.VariableNode(AST.TokenNode(p[2]))
-        
+    p[0] = AST.VariableNode(AST.TokenNode(p[2]))
+
 def p_creation_assignation(p):
     '''statement : VAR IDENTIFIER '=' expression
     | LET IDENTIFIER '=' expression'''
-    if(p[2] not in vars):
-        vars.append(p[2])
-        p[0] = AST.VariableNode([AST.TokenNode(p[2]),AST.AssignNode(AST.TokenNode(p[4]))])
+    p[0] = AST.AssignNode([AST.TokenNode(p[2]),p[4]])
 
 def p_structure(p):
     ''' structure : WHILE '(' expression ')' '{' programme '}' '''
@@ -63,8 +57,7 @@ def p_minus(p):
 
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
-    if(p[1] in vars):
-        p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
+    p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
 
 def p_error(p):
     if p:

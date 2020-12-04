@@ -9,9 +9,9 @@ Notamment, l'utilisation de pydot pour repr�senter un arbre syntaxique cousu
 est une utilisation un peu "limite" de graphviz. �a marche, mais le layout n'est
 pas toujours optimal...
 '''
+dicNode = {}
 
 import pydot
-
 class Node:
     count = 0
     type = 'Node (unspecified)'
@@ -19,6 +19,7 @@ class Node:
     def __init__(self,children=None):
         self.ID = str(Node.count)
         Node.count+=1
+        dicNode[self.ID]= self
         if not children: self.children = []
         elif hasattr(children,'__len__'):
             self.children = children
@@ -124,7 +125,31 @@ class LogNode(Node):
 
 class VariableNode(Node):
     type='variable'
+    '''def __init__(self,children=None):
+        super().__init__(children)
+        self.parentProgramNode = self.parentNodeIsProgrammNode()
+        isNew = True
+        for child in self.parentProgramNode.children : 
+            if child.type == 'variable': 
+                isNew = False
+                child.children.append(self.children)
+        if isNew:
+            self.parentProgramNode.children.append(self)
 
+    def parentNodeIsProgrammNode(self):
+        for key in dicNode:
+            if dicNode[key].type == 'Program' and self.getParentProgrammNode(dicNode[key]):
+                return dicNode[key]
+        raise Exception("Didn't find programm node in parent, not normal")
+
+    def getParentProgrammNode(self,node):
+        if len(node.children) < 1: return False
+        for child in node.children:
+            if child.type == 'Program': return False
+            if child == self : return True
+            if self.getParentProgrammNode(child):
+                return True'''
+    
 class WhileNode(Node):
     type = 'while'
 
