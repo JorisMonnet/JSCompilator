@@ -125,6 +125,9 @@ class LogNode(Node):
 class WhileNode(Node):
     type = 'while'
 
+class DoNode(Node):
+    type = 'do'
+
 class ForNode(Node):
     type = 'for'
 
