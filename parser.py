@@ -23,7 +23,7 @@ def p_for(p):
 
 def p_do_while(p):
     '''structure : DO '{' programme '}' WHILE '(' expression ')' '''
-    p[0] = AST.DoNode([AST.ProgramNode(p[3]),AST.WhileNode([p[7],AST.ProgramNode(p[3])])])
+    p[0] = AST.DoNode([p[3],AST.WhileNode([p[7],p[3]])])
 
 def p_statement_log(p):
     ''' statement : LOG expression '''

@@ -1,0 +1,4 @@
+do {
+    log(1);
+    log(2)
+} while(i-5)
