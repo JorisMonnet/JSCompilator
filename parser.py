@@ -35,6 +35,18 @@ def p_conditionSymbol(p):
     '''
     p[0]=p[1]
 
+def p_condition_not(p):
+    '''condition : '!' condition'''
+    p[0] = AST.NotNode([p[2]])
+
+def p_condition_and(p):
+    '''condition : condition AND condition'''
+    p[0] = AST.AndNode([p[1],p[3]])
+
+def p_condition_or(p):
+    '''condition : condition OR condition'''
+    p[0] = AST.OrNode([p[1],p[3]])
+
 def p_condition(p):
     '''condition : expression conditionSymbol expression'''
     p[0] = AST.ConditionNode([p[1],AST.TokenNode(p[2]),p[3]])
@@ -112,6 +124,10 @@ def p_expression_num_or_var(p):
 def p_expression_paren(p):
     '''expression : '(' expression ')' '''
     p[0] = p[2]
+
+def p_condtition_paren(p):
+    '''condition : '(' condition ')' '''
+    p[0]=p[2]
 
 def p_minus(p):
     ''' expression : ADD_OP expression %prec UMINUS'''

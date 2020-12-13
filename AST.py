@@ -147,6 +147,15 @@ class CaseNode(Node):
 class DefaultNode(Node):
     type='default'
 
+class AndNode(Node):
+    type='&&'
+
+class OrNode(Node):
+    type='||'
+
+class NotNode(Node):
+    type='NOT (!)'
+    
 class ConditionNode(Node):
     type='condition'
 
