@@ -18,6 +18,7 @@ class Node:
     shape = 'ellipse'
     def __init__(self,children=None):
         self.ID = str(Node.count)
+        self.hasGraphicalTree=False
         Node.count+=1
         if not children: self.children = []
         elif hasattr(children,'__len__'):
@@ -49,8 +50,11 @@ class Node:
             if not dot: dot = pydot.Dot()
             dot.add_node(pydot.Node(self.ID,label=repr(self), shape=self.shape))
             label = edgeLabels and len(self.children)-1
+            childrenCopy = self.children
             for i, c in enumerate(self.children):
+                if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
+                c.hasGraphicalTree= c.type !='Program'
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -124,6 +128,9 @@ class LogNode(Node):
     
 class WhileNode(Node):
     type = 'while'
+
+class DoNode(Node):
+    type = 'do'
 
 class ForNode(Node):
     type = 'for'

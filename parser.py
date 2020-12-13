@@ -21,11 +21,15 @@ def p_for(p):
     '''structure : FOR '(' assignation ';' expression ';' assignation ')' '{' programme '}' '''
     p[0]=AST.ForNode([p[3],p[5],p[7],p[10]])
 
+def p_do_while(p):
+    '''structure : DO '{' programme '}' WHILE '(' expression ')' '''
+    p[0] = AST.DoNode([p[3],AST.WhileNode([p[7],p[3]])])
+
 def p_statement_log(p):
     ''' statement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
-def p_structure(p):
+def p_structure_while(p):
     ''' structure : WHILE '(' expression ')' '{' programme '}' '''
     p[0] = AST.WhileNode([p[3],p[6]])
     
@@ -33,6 +37,17 @@ def p_expression_op(p):
     '''expression : expression ADD_OP expression
     | expression MUL_OP expression'''
     p[0] = AST.OpNode(p[2], [p[1], p[3]])
+
+def p_expression_op_assignation(p):
+    '''statement : IDENTIFIER ADD_OP '=' expression
+    | IDENTIFIER MUL_OP '=' expression'''
+    p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+def p_expression_op_assign_double(p):
+    '''statement : IDENTIFIER ADD_OP ADD_OP'''
+    if p[2]==p[3]:
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+    else:
+        print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
 def p_expression_num_or_var(p):
     '''expression : NUMBER
@@ -53,7 +68,7 @@ def p_assign(p):
 
 def p_error(p):
     if p:
-        print ("Syntax error in line %d" % p.lineno)
+        print (f"Syntax error in line {p.lineno}")
         parser.errok()
     else:
         print ("Sytax error: unexpected end of file!")
