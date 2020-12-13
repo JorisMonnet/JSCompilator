@@ -1,10 +1,8 @@
-switch(a){
-    case 2 :
-        log(2);
-        a=5
-    case 4 :
-        log(5)
+(a-2)?b-2:h-6;
 
-    default : 
-        log(6)
+if(a-2){
+    log(2)
+} else {
+    log(3);
+    log(4)
 }
