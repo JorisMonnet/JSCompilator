@@ -19,6 +19,10 @@ def p_statement(p):
     | structureIfElse'''
     p[0] = p[1]
 
+def p_ternary_operator(p):
+    '''structure : expression '?' expression ':' expression'''
+    p[0] = AST.IfNode([p[1],AST.ProgramNode(p[3]),AST.ElseNode(AST.ProgramNode(p[5]))])
+
 def p_if_alone(p):
     '''structureIf : IF '(' expression ')' '{' programme '}' '''
     p[0] = AST.IfNode([p[3],p[6]])

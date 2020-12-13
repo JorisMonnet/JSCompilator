@@ -1,11 +1,8 @@
-if(a-2){
-    log(2)
-};
+(a-2)?b-2:h-6;
 
 if(a-2){
     log(2)
-} else if(i-4){
-    log(3)
 } else {
+    log(3);
     log(4)
 }
