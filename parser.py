@@ -52,6 +52,26 @@ def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' programme '}' '''
     p[0]=AST.ForNode([p[3],p[5],p[7],p[10]])
 
+def p_switch(p):
+    '''structure : SWITCH '(' IDENTIFIER ')' '{' caseStructureList '}' '''
+    p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[6]])
+
+def p_case(p):
+    '''caseStructure : CASE expression ':' programme '''
+    p[0] = AST.CaseNode([p[2],p[4]])
+
+def p_case_list_alone(p) :
+    '''caseStructureList : caseStructure'''
+    p[0] = p[1]
+
+def p_default(p):
+    '''caseStructure : DEFAULT ':' programme'''
+    p[0] = AST.DefaultNode([p[3]])
+
+def p_case_List(p):
+    '''caseStructureList : caseStructure caseStructureList'''
+    p[0] =  p[1]
+
 def p_do_while(p):
     '''structure : DO '{' programme '}' WHILE '(' condition ')' '''
     p[0] = AST.DoNode([p[3],AST.WhileNode([p[7],p[3]])])
