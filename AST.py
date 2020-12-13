@@ -138,6 +138,18 @@ class WhileNode(Node):
 class DoNode(Node):
     type = 'do'
 
+class SwitchNode(Node):
+    type='switch'
+
+class CaseNode(Node):
+    type='case'
+    
+class DefaultNode(Node):
+    type='default'
+
+class ConditionNode(Node):
+    type='condition'
+
 class ForNode(Node):
     type = 'for'
 

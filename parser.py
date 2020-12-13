@@ -20,11 +20,27 @@ def p_statement(p):
     p[0] = p[1]
 
 def p_ternary_operator(p):
-    '''structure : expression '?' expression ':' expression'''
+    '''structure : condition '?' expression ':' expression'''
     p[0] = AST.IfNode([p[1],AST.ProgramNode(p[3]),AST.ElseNode(AST.ProgramNode(p[5]))])
 
+def p_conditionSymbol(p):
+    '''conditionSymbol : LT
+    | GT
+    | LTE
+    | GTE
+    | EQUALV
+    | EQUALVT
+    | NOTEQUALV
+    | NOTEQUALVT
+    '''
+    p[0]=p[1]
+
+def p_condition(p):
+    '''condition : expression conditionSymbol expression'''
+    p[0] = AST.ConditionNode([p[1],AST.TokenNode(p[2]),p[3]])
+
 def p_if_alone(p):
-    '''structureIf : IF '(' expression ')' '{' programme '}' '''
+    '''structureIf : IF '(' condition ')' '{' programme '}' '''
     p[0] = AST.IfNode([p[3],p[6]])
 
 def p_if_else(p):
@@ -37,11 +53,31 @@ def p_if_elseif(p):
     p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
 
 def p_for(p):
-    '''structure : FOR '(' assignation ';' expression ';' assignation ')' '{' programme '}' '''
+    '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' programme '}' '''
     p[0]=AST.ForNode([p[3],p[5],p[7],p[10]])
 
+def p_switch(p):
+    '''structure : SWITCH '(' IDENTIFIER ')' '{' caseStructureList '}' '''
+    p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[6]])
+
+def p_case(p):
+    '''caseStructure : CASE expression ':' programme '''
+    p[0] = AST.CaseNode([p[2],p[4]])
+
+def p_case_list_alone(p) :
+    '''caseStructureList : caseStructure'''
+    p[0] = p[1]
+
+def p_default(p):
+    '''caseStructure : DEFAULT ':' programme'''
+    p[0] = AST.DefaultNode([p[3]])
+
+def p_case_List(p):
+    '''caseStructureList : caseStructure caseStructureList'''
+    p[0] =  p[1]
+
 def p_do_while(p):
-    '''structure : DO '{' programme '}' WHILE '(' expression ')' '''
+    '''structure : DO '{' programme '}' WHILE '(' condition ')' '''
     p[0] = AST.DoNode([p[3],AST.WhileNode([p[7],p[3]])])
 
 def p_statement_log(p):
@@ -49,7 +85,7 @@ def p_statement_log(p):
     p[0] = AST.LogNode(p[2])
 
 def p_structure_while(p):
-    ''' structure : WHILE '(' expression ')' '{' programme '}' '''
+    ''' structure : WHILE '(' condition ')' '{' programme '}' '''
     p[0] = AST.WhileNode([p[3],p[6]])
     
 def p_expression_op(p):
