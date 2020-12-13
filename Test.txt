@@ -1,11 +1,3 @@
-if(a-2){
+if(a===2){
     log(2)
-};
-
-if(a-2){
-    log(2)
-} else if(i-4){
-    log(3)
-} else {
-    log(4)
 }

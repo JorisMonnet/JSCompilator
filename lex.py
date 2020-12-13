@@ -9,14 +9,27 @@ reserved_words = (
     'else'
 )
 
+conditions_symbols = (
+    'LT','GT','LTE','GTE','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT'
+)
+
+t_LT = r'<'
+t_GT = r'>'
+t_LTE = r'<='
+t_GTE = r'>='
+t_EQUALVT = r'==='
+t_NOTEQUALVT = r'!==' 
+t_EQUALV = r'==' 
+t_NOTEQUALV = r'!='
+
 tokens = (
     'NUMBER',
     'ADD_OP',
     'MUL_OP',
     'IDENTIFIER',
-) + tuple(map(lambda s:s.upper(),reserved_words))
+) + tuple(map(lambda s:s.upper(),reserved_words)) + conditions_symbols
 
-literals = '();={}'
+literals = '();={}&|'
 
 def t_ADD_OP(t):
     r'[+-]'
