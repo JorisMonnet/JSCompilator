@@ -137,6 +137,9 @@ class WhileNode(Node):
 
 class DoNode(Node):
     type = 'do'
+    
+class ConditionNode(Node):
+    type='condition'
 
 class ForNode(Node):
     type = 'for'
