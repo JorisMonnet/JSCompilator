@@ -122,7 +122,13 @@ class OpNode(Node):
     
 class AssignNode(Node):
     type = '='
-    
+
+class IfNode(Node):
+    type = 'if'
+
+class ElseNode(Node):
+    type = 'else'
+
 class LogNode(Node):
     type = 'log'
     

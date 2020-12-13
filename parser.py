@@ -14,8 +14,23 @@ def p_programme_recursive(p):
 
 def p_statement(p):
     ''' statement : assignation
-    | structure '''
+    | structure 
+    | structureIf
+    | structureIfElse'''
     p[0] = p[1]
+
+def p_if_alone(p):
+    '''structureIf : IF '(' expression ')' '{' programme '}' '''
+    p[0] = AST.IfNode([p[3],p[6]])
+
+def p_if_else(p):
+    '''structureIfElse : structureIf ELSE '{' programme '}' '''
+    p[0] = AST.IfNode([AST.ElseNode(p[4])]+p[1].children)
+
+def p_if_elseif(p): 
+    '''structure : structureIf ELSE structureIf
+    | structureIf ELSE structureIfElse'''
+    p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
 
 def p_for(p):
     '''structure : FOR '(' assignation ';' expression ';' assignation ')' '{' programme '}' '''

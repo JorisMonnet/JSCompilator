@@ -1,19 +1,11 @@
-for(i=0;i-5;i=i+1){
-    log(2);
-    log(4)
-};
-for(i=0;i-5;i=i+1){
-    log(2);
-    log(4)
-};
-do {
-    log(1);
+if(a-2){
     log(2)
-} while(i-5);
-a*=5;
-b+=2;
-c-=23;
-d/=56;
-e++;
-f--;
-g+-
+};
+
+if(a-2){
+    log(2)
+} else if(i-4){
+    log(3)
+} else {
+    log(4)
+}

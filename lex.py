@@ -4,7 +4,9 @@ reserved_words = (
     'for',
     'while',
     'log',
-    'do'
+    'do',
+    'if',
+    'else'
 )
 
 tokens = (
