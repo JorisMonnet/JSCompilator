@@ -112,6 +112,10 @@ def p_expression_num_or_var(p):
 def p_expression_paren(p):
     '''expression : '(' expression ')' '''
     p[0] = p[2]
+    
+def p_condtition_paren(p):
+    '''condition : '(' condition ')' '''
+    p[0]=p[2]
 
 def p_minus(p):
     ''' expression : ADD_OP expression %prec UMINUS'''
