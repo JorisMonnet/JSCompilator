@@ -34,6 +34,17 @@ def p_expression_op(p):
     | expression MUL_OP expression'''
     p[0] = AST.OpNode(p[2], [p[1], p[3]])
 
+def p_expression_op_assignation(p):
+    '''statement : IDENTIFIER ADD_OP '=' expression
+    | IDENTIFIER MUL_OP '=' expression'''
+    p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+def p_expression_op_assign_double(p):
+    '''statement : IDENTIFIER ADD_OP ADD_OP'''
+    if p[2]==p[3]:
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+    else:
+        print (f"Syntax error : +- or -+ after variable name : {p[1]}")
+
 def p_expression_num_or_var(p):
     '''expression : NUMBER
     | IDENTIFIER '''
