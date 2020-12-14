@@ -14,7 +14,8 @@ def p_statement(p):
     ''' statement : assignation
     | structure 
     | structureIf
-    | structureIfElse'''
+    | structureIfElse
+    | varList'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -95,14 +96,23 @@ def p_statement_log(p):
     p[0] = AST.LogNode(p[2])
 
 def p_creation(p):
-    '''statement : VAR IDENTIFIER
+    '''varCreation : VAR IDENTIFIER
     | LET IDENTIFIER'''
-    p[0] = AST.VariableNode(AST.TokenNode(p[2]))
+    p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+
+def p_creation_list(p): 
+    '''varList : varCreation ',' IDENTIFIER
+    |  varList ',' IDENTIFIER'''
+    p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+
+def p_creation_list_alone(p):
+    '''varList : varCreation'''
+    p[0] = p[1]
 
 def p_creation_assignation(p):
-    '''statement : VAR IDENTIFIER '=' expression
-    | LET IDENTIFIER '=' expression'''
-    p[0] = AST.AssignNode([AST.TokenNode(p[2]),p[4]])
+    '''statement : varList '=' expression'''
+    #AST.getVariableNode().addVariables([p[1].chidren])
+    p[0] = AST.AssignNode(p[1].children+[p[3]])
 
 def p_structure_while(p):
     ''' structure : WHILE '(' condition ')' '{' programme '}' '''
@@ -117,6 +127,7 @@ def p_expression_op_assignation(p):
     '''statement : IDENTIFIER ADD_OP '=' expression
     | IDENTIFIER MUL_OP '=' expression'''
     p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+
 def p_expression_op_assign_double(p):
     '''statement : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
@@ -171,6 +182,7 @@ if __name__ == "__main__":
     if result:
         print (result)
         import os
+        AST.recreateVariableNode()
         graph = result.makegraphicaltree()
         name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
         graph.write_pdf(name)

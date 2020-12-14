@@ -47,11 +47,10 @@ class Node:
     def __repr__(self):
         return self.type
     
-    def makegraphicaltree(self, dot=None, edgeLabels=True):
+    def makegraphicaltree(self, dot=None, edgeLabels=True, firstTime = False):
             if not dot: dot = pydot.Dot()
             dot.add_node(pydot.Node(self.ID,label=repr(self), shape=self.shape))
             label = edgeLabels and len(self.children)-1
-            childrenCopy = self.children
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
@@ -99,7 +98,18 @@ class Node:
         
 class ProgramNode(Node):
     type = 'Program'
-        
+    def __init__(self,children):
+        self.variableNode = None
+        super().__init__(children)
+
+    def addVariables(self,variables):
+        if not self.variableNode : 
+            self.variableNode = VariableNode(variables)
+            self.children.append(self.variableNode)
+        else:
+            self.variableNode.children.extend(variables)
+
+    
 class TokenNode(Node):
     type = 'token'
     def __init__(self, tok):
@@ -124,45 +134,18 @@ class OpNode(Node):
 class AssignNode(Node):
     type = '='
 
-<<<<<<< HEAD
-=======
 class IfNode(Node):
     type = 'if'
 
 class ElseNode(Node):
     type = 'else'
 
->>>>>>> develop
 class LogNode(Node):
     type = 'log'
 
 class VariableNode(Node):
-    type='variable'
-    '''def __init__(self,children=None):
-        super().__init__(children)
-        self.parentProgramNode = self.parentNodeIsProgrammNode()
-        isNew = True
-        for child in self.parentProgramNode.children : 
-            if child.type == 'variable': 
-                isNew = False
-                child.children.append(self.children)
-        if isNew:
-            self.parentProgramNode.children.append(self)
+    type='variable(s)'
 
-    def parentNodeIsProgrammNode(self):
-        for key in dicNode:
-            if dicNode[key].type == 'Program' and self.getParentProgrammNode(dicNode[key]):
-                return dicNode[key]
-        raise Exception("Didn't find programm node in parent, not normal")
-
-    def getParentProgrammNode(self,node):
-        if len(node.children) < 1: return False
-        for child in node.children:
-            if child.type == 'Program': return False
-            if child == self : return True
-            if self.getParentProgrammNode(child):
-                return True'''
-    
 class WhileNode(Node):
     type = 'while'
 
@@ -203,3 +186,13 @@ def addToClass(cls):
         setattr(cls,func.__name__,func)
         return func
     return decorator
+                    
+def recreateVariableNode():
+    programNodeList = [dicNode[key] for key in dicNode if dicNode[key].type == 'Program']
+    variableNodeList = [dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)']
+    for programNode in programNodeList:
+        listVariableNode = [variableNode for variableNode in variableNodeList if variableNode in programNode.children]
+        if listVariableNode and hasattr(listVariableNode,'__len__'):
+            for variableNode in listVariableNode:
+                programNode.addVariables(variableNode.children)
+                programNode.children.remove(variableNode)

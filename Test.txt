@@ -1,18 +1,9 @@
-<<<<<<< HEAD
-var j = 2;
-let b;
-for(i=0;i-5;i=i+1){
-    var a = 4;
-    log(2)
+var j,r;
+let m,b,trez,greag,ogtr,gre,greag,gro,gfragr,gra = 5;
+var o;
+if(a<5){
+    var i = 4;
+    let y,o
 };
-log(b)
-=======
-!(a>2&&b<1)?b-2:h-6;
-
-if(a<2||b<5){
-    log(2)
-} else {
-    log(3);
-    log(4)
-}
->>>>>>> develop
+var t;
+var y
