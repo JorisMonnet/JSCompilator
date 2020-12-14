@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var j = 2;
 let b;
 for(i=0;i-5;i=i+1){
@@ -5,3 +6,13 @@ for(i=0;i-5;i=i+1){
     log(2)
 };
 log(b)
+=======
+!(a>2&&b<1)?b-2:h-6;
+
+if(a<2||b<5){
+    log(2)
+} else {
+    log(3);
+    log(4)
+}
+>>>>>>> develop

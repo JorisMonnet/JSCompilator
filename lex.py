@@ -6,16 +6,39 @@ reserved_words = (
     'log',
     'var',
     'let',
+    'do',
+    'if',
+    'else',
+    'switch',
+    'case',
+    'default'
 )
+
+conditions_symbols = (
+    'LT','GT','LTE','GTE','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT','OR','AND'
+)
+
+t_LT = r'<'
+t_GT = r'>'
+t_LTE = r'<='
+t_GTE = r'>='
+t_EQUALVT = r'==='
+t_NOTEQUALVT = r'!==' 
+t_EQUALV = r'==' 
+t_NOTEQUALV = r'!='
+t_NEWLINE = r'\n'
+t_AND=r'&&'
+t_OR=r'\|\|'
 
 tokens = (
     'NUMBER',
     'ADD_OP',
     'MUL_OP',
     'IDENTIFIER',
-) + tuple(map(lambda s:s.upper(),reserved_words))
+    'NEWLINE',
+) + tuple(map(lambda s:s.upper(),reserved_words)) + conditions_symbols
 
-literals = '();={}'
+literals = '();={}?&|:!'
 
 def t_ADD_OP(t):
     r'[+-]'

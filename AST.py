@@ -18,6 +18,7 @@ class Node:
     shape = 'ellipse'
     def __init__(self,children=None):
         self.ID = str(Node.count)
+        self.hasGraphicalTree=False
         Node.count+=1
         dicNode[self.ID]= self
         if not children: self.children = []
@@ -50,8 +51,11 @@ class Node:
             if not dot: dot = pydot.Dot()
             dot.add_node(pydot.Node(self.ID,label=repr(self), shape=self.shape))
             label = edgeLabels and len(self.children)-1
+            childrenCopy = self.children
             for i, c in enumerate(self.children):
+                if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
+                c.hasGraphicalTree= c.type !='Program'
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -120,6 +124,15 @@ class OpNode(Node):
 class AssignNode(Node):
     type = '='
 
+<<<<<<< HEAD
+=======
+class IfNode(Node):
+    type = 'if'
+
+class ElseNode(Node):
+    type = 'else'
+
+>>>>>>> develop
 class LogNode(Node):
     type = 'log'
 
@@ -152,6 +165,30 @@ class VariableNode(Node):
     
 class WhileNode(Node):
     type = 'while'
+
+class DoNode(Node):
+    type = 'do'
+
+class SwitchNode(Node):
+    type='switch'
+
+class CaseNode(Node):
+    type='case'
+    
+class DefaultNode(Node):
+    type='default'
+
+class AndNode(Node):
+    type='&&'
+
+class OrNode(Node):
+    type='||'
+
+class NotNode(Node):
+    type='NOT (!)'
+    
+class ConditionNode(Node):
+    type='condition'
 
 class ForNode(Node):
     type = 'for'
