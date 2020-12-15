@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from lex import tokens
 import AST
 
+vars = []
 def p_programme_statement(p):
     ''' programme : statement '''
     p[0] = AST.ProgramNode(p[1])
@@ -69,7 +70,10 @@ def p_for(p):
 
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' caseStructureList '}' '''
-    p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[6]])
+    if p[3] in vars:
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[6]])
+    else :
+        print(f"{p[3]} is not declared")
 
 def p_case(p):
     '''caseStructure : CASE expression ':' programme '''
@@ -98,17 +102,19 @@ def p_statement_log(p):
 def p_creation(p):
     '''varCreation : VAR IDENTIFIER
     | LET IDENTIFIER'''
+    vars.append(p[2])
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
 
 def p_creation_list(p): 
     '''varList : varCreation ',' IDENTIFIER
     |  varList ',' IDENTIFIER'''
+    vars.append(p[3])
     p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
 
 def p_creation_list_alone(p):
     '''varList : varCreation'''
     p[0] = p[1]
-
+    
 def p_creation_assignation(p):
     '''statement : varList '=' expression'''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
@@ -125,19 +131,31 @@ def p_expression_op(p):
 def p_expression_op_assignation(p):
     '''statement : IDENTIFIER ADD_OP '=' expression
     | IDENTIFIER MUL_OP '=' expression'''
-    p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+    if p[1] in vars:
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+    else : 
+        print(f"{p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
     '''statement : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
-        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+        if p[1] in vars:
+            p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+        else : 
+            print(f"{p[1]} is not declared")
     else:
         print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
-def p_expression_num_or_var(p):
-    '''expression : NUMBER
-    | IDENTIFIER '''
+def p_expression_num(p):
+    '''expression : NUMBER '''
     p[0] = AST.TokenNode(p[1])
+
+def p_expression_var(p):
+    '''expression : IDENTIFIER '''
+    if p[1] in vars:
+        p[0] = AST.TokenNode(p[1])
+    else :
+        print(f"{p[1]} is not declared")
 
 def p_expression_paren(p):
     '''expression : '(' expression ')' '''
@@ -153,7 +171,10 @@ def p_minus(p):
 
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
-    p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
+    if(p[1] in vars) : 
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
+    else : 
+        print(f"{p[1]} is not declared")
 
 def p_error(p):
     if p:
