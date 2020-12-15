@@ -26,7 +26,6 @@ t_EQUALVT = r'==='
 t_NOTEQUALVT = r'!==' 
 t_EQUALV = r'==' 
 t_NOTEQUALV = r'!='
-t_NEWLINE = r'\n'
 t_AND=r'&&'
 t_OR=r'\|\|'
 
@@ -64,12 +63,9 @@ def t_IDENTIFIER(t):
     return t
 
 def t_NEWLINE(t):
-    r'\n'
-    return t
-
-def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+    return t
 
 t_ignore = ' \t'
 

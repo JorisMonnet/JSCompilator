@@ -1,19 +1,11 @@
-for(i=0;i-5;i=i+1){
+var i
+for(i=0;i<5;i=i+1){
     log(2)
     log(4)
 }
-for(i=0;i-5;i=i+1){
-    log(2)
-    log(4)
-}
-do {
-    log(1)
-    log(2)
-} while(i-5)
-a*=5
-b+=2
-c-=23
-d/=56
+
+let e;
+var f
 e++
 f--
 var j,r;
@@ -22,7 +14,6 @@ var o;
 if(o<5){
     var i = 4;
     var b = 5;
-    y=6;
     let y,o
 };
 var t;

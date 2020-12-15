@@ -18,13 +18,13 @@ def p_beginning_of_program(p):
     p[0] = p[2]
 
 def p_programme_statement(p):
-    ''' programme : statement NEWLINE
-    | statement ';' '''
+    ''' programme : statement  ';' 
+    | statement NEWLINE ''' 
     p[0] = AST.ProgramNode(p[1])
 
 def p_programme_recursive(p):
     ''' programme : statement ';' programme 
-    | statement NEWLINE programme'''
+    | statement NEWLINE programme '''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
 
 def p_statement(p):
@@ -235,13 +235,13 @@ if __name__ == "__main__":
     prog = open(sys.argv[1]).read()
     if not error:
         result = yacc.parse(prog)
-    elif result :
-        AST.recreateVariableNode()
-        print (result)
-        import os
-        graph = result.makegraphicaltree()
-        name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
-        graph.write_pdf(name)
-        print ("wrote ast to", name)
-    else:
-        print ("Parsing returned no result!")
+        if result :
+            AST.recreateVariableNode()
+            print (result)
+            import os
+            graph = result.makegraphicaltree()
+            name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
+            graph.write_pdf(name)
+            print ("wrote ast to", name)
+        else:
+            print ("Parsing returned no result!")
