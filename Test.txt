@@ -3,18 +3,5 @@ for(i=0;i<5;i=i+1){
     log(2)
     log(4)
 }
-
-let e;
-var f
-e++
-f--
-var j,r;
-let m,b,trez,greag,ogtr,gre,greag,gro,gfragr,gra = 5;
-var o;
-if(o<5){
-    var i = 4;
-    var b = 5;
-    let y,o
-};
-var t;
-var y
+for(i=0;i<5;i=i+1)
+    log(5)
