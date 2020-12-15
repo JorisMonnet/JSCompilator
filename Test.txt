@@ -4,7 +4,7 @@ var o;
 if(o<5){
     var i = 4;
     var b = 5;
-    i=6;
+    y=6;
     let y,o
 };
 var t;
