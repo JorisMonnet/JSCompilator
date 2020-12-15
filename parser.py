@@ -2,7 +2,16 @@ import ply.yacc as yacc
 from lex import tokens
 import AST
 
-vars = {}
+class Scope():
+    def __init__(self):
+        self.vars= []
+
+listScope = [Scope()]
+
+error = False
+
+def popscope():
+    listScope.pop()
 
 def p_beginning_of_program(p):
     ''' programme : NEWLINE programme'''
@@ -20,25 +29,129 @@ def p_programme_recursive(p):
 
 def p_statement(p):
     ''' statement : assignation
-    | structure '''
+    | structure 
+    | structureIf
+    | structureIfElse
+    | varList'''
     p[0] = p[1]
 
+def p_ternary_operator(p):
+    '''structure : condition '?' expression ':' expression'''
+    p[0] = AST.IfNode([p[1],AST.ProgramNode(p[3]),AST.ElseNode(AST.ProgramNode(p[5]))])
+
+def p_newscope(p):
+    '''new_scope : '''
+    listScope.append(Scope())
+
+def p_conditionSymbol(p):
+    '''conditionSymbol : LT
+    | GT
+    | LTE
+    | GTE
+    | EQUALV
+    | EQUALVT
+    | NOTEQUALV
+    | NOTEQUALVT
+    '''
+    p[0]=p[1]
+
+def p_condition_not(p):
+    '''condition : '!' condition'''
+    p[0] = AST.NotNode([p[2]])
+
+def p_condition_and(p):
+    '''condition : condition AND condition'''
+    p[0] = AST.AndNode([p[1],p[3]])
+
+def p_condition_or(p):
+    '''condition : condition OR condition'''
+    p[0] = AST.OrNode([p[1],p[3]])
+
+def p_condition(p):
+    '''condition : expression conditionSymbol expression'''
+    p[0] = AST.ConditionNode([p[1],AST.TokenNode(p[2]),p[3]])
+
+def p_if_alone(p):
+    '''structureIf : IF '(' condition ')' '{' new_scope programme '}' '''
+    p[0] = AST.IfNode([p[3],p[7]])
+    popscope()
+
+def p_if_else(p):
+    '''structureIfElse : structureIf ELSE '{' new_scope programme '}' '''
+    p[0] = AST.IfNode([AST.ElseNode(p[5])]+p[1].children)
+    popscope()
+
+def p_if_elseif(p): 
+    '''structure : structureIf ELSE structureIf
+    | structureIf ELSE structureIfElse'''
+    p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
+
 def p_for(p):
-    '''structure : FOR '(' assignation ';' expression ';' assignation ')' '{' programme '}' '''
-    p[0]=AST.ForNode([p[3],p[5],p[7],p[10]])
+    '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' new_scope programme '}' '''
+    p[0]=AST.ForNode([p[3],p[5],p[7],p[11]])
+    popscope()
+
+def p_switch(p):
+    '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
+    if p[3] in listScope[-2].vars:
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
+        popscope()
+    else :
+        print(f"{p[3]} is not declared")
+        error = True
+
+def p_case(p):
+    '''caseStructure : CASE expression ':' new_scope programme '''
+    p[0] = AST.CaseNode([p[2],p[5]])
+    popscope()
+
+def p_case_list_alone(p) :
+    '''caseStructureList : caseStructure'''
+    p[0] = p[1]
+
+def p_default(p):
+    '''caseStructure : DEFAULT ':' new_scope programme'''
+    p[0] = AST.DefaultNode([p[4]])
+    popscope()
+
+def p_case_List(p):
+    '''caseStructureList : caseStructure caseStructureList'''
+    p[0] =  p[1]
 
 def p_do_while(p):
-    '''structure : DO '{' programme '}' WHILE '(' expression ')' '''
-    p[0] = AST.DoNode([p[3],AST.WhileNode([p[7],p[3]])])
+    '''structure : DO '{' new_scope programme '}' WHILE '(' condition ')' '''
+    p[0] = AST.DoNode([p[4],AST.WhileNode([p[8],p[4]])])
+    popscope()
 
 def p_statement_log(p):
     ''' statement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
-def p_structure_while(p):
-    ''' structure : WHILE '(' expression ')' '{' programme '}' '''
-    p[0] = AST.WhileNode([p[3],p[6]])
+def p_creation(p):
+    '''varCreation : VAR IDENTIFIER
+    | LET IDENTIFIER'''
+    listScope[-1].vars.append(p[2])
+    p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+
+def p_creation_list(p): 
+    '''varList : varCreation ',' IDENTIFIER
+    |  varList ',' IDENTIFIER'''
+    listScope[-1].vars.append(p[3])
+    p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+
+def p_creation_list_alone(p):
+    '''varList : varCreation'''
+    p[0] = p[1]
     
+def p_creation_assignation(p):
+    '''statement : varList '=' expression'''
+    p[0] = AST.AssignNode(p[1].children+[p[3]],True)
+
+def p_structure_while(p):
+    ''' structure : WHILE '(' condition ')' '{' new_scope programme '}' '''
+    p[0] = AST.WhileNode([p[3],p[6]])
+    popscope()
+
 def p_expression_op(p):
     '''expression : expression ADD_OP expression
     | expression MUL_OP expression'''
@@ -47,22 +160,43 @@ def p_expression_op(p):
 def p_expression_op_assignation(p):
     '''statement : IDENTIFIER ADD_OP '=' expression
     | IDENTIFIER MUL_OP '=' expression'''
-    p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+    if p[1] in listScope[-1].vars:
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
+    else : 
+        error = True
+        print(f"{p[1]} is not declared")
+
 def p_expression_op_assign_double(p):
     '''statement : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
-        p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+        if p[1] in listScope[-1].vars:
+            p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
+        else : 
+            error = True
+            print(f"{p[1]} is not declared")
     else:
+        error = True
         print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
-def p_expression_num_or_var(p):
-    '''expression : NUMBER
-    | IDENTIFIER '''
+def p_expression_num(p):
+    '''expression : NUMBER '''
     p[0] = AST.TokenNode(p[1])
+
+def p_expression_var(p):
+    '''expression : IDENTIFIER '''
+    if p[1] in listScope[-1].vars:
+        p[0] = AST.TokenNode(p[1])
+    else :
+        error = True
+        print(f"{p[1]} is not declared")
 
 def p_expression_paren(p):
     '''expression : '(' expression ')' '''
     p[0] = p[2]
+
+def p_condtition_paren(p):
+    '''condition : '(' condition ')' '''
+    p[0]=p[2]
 
 def p_minus(p):
     ''' expression : ADD_OP expression %prec UMINUS'''
@@ -70,9 +204,14 @@ def p_minus(p):
 
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
-    p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
+    if(p[1] in listScope[-1].vars) : 
+        p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
+    else : 
+        error = True
+        print(f"{p[1]} is not declared")
 
 def p_error(p):
+    error = True
     if p:
         print (f"Syntax error in line {p.lineno} with {p}")
         parser.errok()
@@ -94,8 +233,10 @@ if __name__ == "__main__":
     import sys
 
     prog = open(sys.argv[1]).read()
-    result = yacc.parse(prog)
-    if result:
+    if not error:
+        result = yacc.parse(prog)
+    elif result :
+        AST.recreateVariableNode()
         print (result)
         import os
         graph = result.makegraphicaltree()
