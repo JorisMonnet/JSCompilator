@@ -103,13 +103,11 @@ class ProgramNode(Node):
         super().__init__(children)
 
     def addVariables(self,variables):
-        print("variables" + str(variables))
         if not self.variableNode : 
             self.variableNode = VariableNode(variables)
-            self.children.append(self.variableNode)
+            self.children.insert(0,self.variableNode)
         else:
             self.variableNode.children.extend(variables)
-        print("resultat"+str(self.variableNode.children))
    
 class TokenNode(Node):
     type = 'token'
