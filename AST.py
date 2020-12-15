@@ -9,9 +9,9 @@ Notamment, l'utilisation de pydot pour repr�senter un arbre syntaxique cousu
 est une utilisation un peu "limite" de graphviz. �a marche, mais le layout n'est
 pas toujours optimal...
 '''
+dicNode = {}
 
 import pydot
-
 class Node:
     count = 0
     type = 'Node (unspecified)'
@@ -20,6 +20,7 @@ class Node:
         self.ID = str(Node.count)
         self.hasGraphicalTree=False
         Node.count+=1
+        dicNode[self.ID]= self
         if not children: self.children = []
         elif hasattr(children,'__len__'):
             self.children = children
@@ -46,15 +47,14 @@ class Node:
     def __repr__(self):
         return self.type
     
-    def makegraphicaltree(self, dot=None, edgeLabels=True):
+    def makegraphicaltree(self, dot=None, edgeLabels=True, firstTime = False):
             if not dot: dot = pydot.Dot()
             dot.add_node(pydot.Node(self.ID,label=repr(self), shape=self.shape))
             label = edgeLabels and len(self.children)-1
-            childrenCopy = self.children
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
-                c.hasGraphicalTree= c.type !='Program'
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token'
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -98,7 +98,17 @@ class Node:
         
 class ProgramNode(Node):
     type = 'Program'
-        
+    def __init__(self,children):
+        self.variableNode = None
+        super().__init__(children)
+
+    def addVariables(self,variables):
+        if not self.variableNode : 
+            self.variableNode = VariableNode(variables)
+            self.children.insert(0,self.variableNode)
+        else:
+            self.variableNode.children.extend(variables)
+   
 class TokenNode(Node):
     type = 'token'
     def __init__(self, tok):
@@ -119,10 +129,12 @@ class OpNode(Node):
         
     def __repr__(self):
         return "%s (%s)" % (self.op, self.nbargs)
-    
+
 class AssignNode(Node):
     type = '='
-
+    def __init__(self,children,isCreated=False):
+        self.isCreated = isCreated
+        super().__init__(children)
 class IfNode(Node):
     type = 'if'
 
@@ -131,7 +143,10 @@ class ElseNode(Node):
 
 class LogNode(Node):
     type = 'log'
-    
+
+class VariableNode(Node):
+    type='variable(s)'
+
 class WhileNode(Node):
     type = 'while'
 
@@ -172,3 +187,18 @@ def addToClass(cls):
         setattr(cls,func.__name__,func)
         return func
     return decorator
+                    
+def recreateVariableNode():
+    programNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Program'])
+    variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)'])
+    assignCreationNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == '=' and dicNode[key].isCreated])
+
+    for programNode in programNodeList:
+        # var nodes
+        for variableNode in set([variableNode for variableNode in variableNodeList if variableNode in programNode.children]):
+            programNode.addVariables(list(set(variableNode.children)))
+            programNode.children.remove(variableNode)
+
+        # assign nodes with creation of variables
+        for assignNode in set([assignNode for assignNode in assignCreationNodeList if assignNode in programNode.children]):
+            programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))

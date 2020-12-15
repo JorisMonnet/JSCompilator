@@ -4,6 +4,8 @@ reserved_words = (
     'for',
     'while',
     'log',
+    'var',
+    'let',
     'do',
     'if',
     'else',
@@ -36,7 +38,7 @@ tokens = (
     'NEWLINE',
 ) + tuple(map(lambda s:s.upper(),reserved_words)) + conditions_symbols
 
-literals = '();={}?&|:!'
+literals = '();={}?&|:!,'
 
 def t_ADD_OP(t):
     r'[+-]'
