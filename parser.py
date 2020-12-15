@@ -2,9 +2,14 @@ import ply.yacc as yacc
 from lex import tokens
 import AST
 
+listScope = []
+
 class Scope():
     def __init__(self):
-        self.vars= []
+        if(len(listScope)>1):
+            self.vars = listScope[-1].vars
+        else :
+            self.vars = []
 
 listScope = [Scope()]
 
@@ -93,7 +98,7 @@ def p_for(p):
 
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
-    if p[3] in listScope[-2].vars:
+    if p[3] in listScope[:-2].vars:
         p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
         popscope()
     else :
@@ -204,6 +209,7 @@ def p_minus(p):
 
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
+    listVars = list()
     if(p[1] in listScope[-1].vars) : 
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
