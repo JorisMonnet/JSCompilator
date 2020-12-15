@@ -4,12 +4,18 @@ import AST
 
 vars = {}
 
+def p_beginning_of_program(p):
+    ''' programme : NEWLINE programme'''
+    p[0] = p[2]
+
 def p_programme_statement(p):
-    ''' programme : statement '''
+    ''' programme : statement NEWLINE
+    | statement ';' '''
     p[0] = AST.ProgramNode(p[1])
 
 def p_programme_recursive(p):
-    ''' programme : statement ';' programme '''
+    ''' programme : statement ';' programme 
+    | statement NEWLINE programme'''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
 
 def p_statement(p):
@@ -68,7 +74,7 @@ def p_assign(p):
 
 def p_error(p):
     if p:
-        print (f"Syntax error in line {p.lineno}")
+        print (f"Syntax error in line {p.lineno} with {p}")
         parser.errok()
     else:
         print ("Sytax error: unexpected end of file!")

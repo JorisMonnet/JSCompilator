@@ -12,6 +12,7 @@ tokens = (
     'ADD_OP',
     'MUL_OP',
     'IDENTIFIER',
+    'NEWLINE',
 ) + tuple(map(lambda s:s.upper(),reserved_words))
 
 literals = '();={}'
@@ -37,6 +38,10 @@ def t_IDENTIFIER(t):
     r'[A-Za-z_]\w*'
     if t.value in reserved_words:
         t.type = t.value.upper()
+    return t
+
+def t_NEWLINE(t):
+    r'\n'
     return t
 
 def t_newline(t):
