@@ -63,6 +63,10 @@ def t_IDENTIFIER(t):
         t.type = t.value.upper()
     return t
 
+def t_NEWLINE(t):
+    r'\n'
+    return t
+
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
