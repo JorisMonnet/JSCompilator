@@ -54,7 +54,7 @@ class Node:
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
-                c.hasGraphicalTree= c.type !='Program'
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token'
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -103,13 +103,14 @@ class ProgramNode(Node):
         super().__init__(children)
 
     def addVariables(self,variables):
+        print("variables" + str(variables))
         if not self.variableNode : 
             self.variableNode = VariableNode(variables)
             self.children.append(self.variableNode)
         else:
             self.variableNode.children.extend(variables)
-
-    
+        print("resultat"+str(self.variableNode.children))
+   
 class TokenNode(Node):
     type = 'token'
     def __init__(self, tok):
@@ -133,7 +134,9 @@ class OpNode(Node):
 
 class AssignNode(Node):
     type = '='
-
+    def __init__(self,children,isCreated=False):
+        self.isCreated = isCreated
+        super().__init__(children)
 class IfNode(Node):
     type = 'if'
 
@@ -188,11 +191,16 @@ def addToClass(cls):
     return decorator
                     
 def recreateVariableNode():
-    programNodeList = [dicNode[key] for key in dicNode if dicNode[key].type == 'Program']
-    variableNodeList = [dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)']
+    programNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Program'])
+    variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)'])
+    assignCreationNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == '=' and dicNode[key].isCreated])
+
     for programNode in programNodeList:
-        listVariableNode = [variableNode for variableNode in variableNodeList if variableNode in programNode.children]
-        if listVariableNode and hasattr(listVariableNode,'__len__'):
-            for variableNode in listVariableNode:
-                programNode.addVariables(variableNode.children)
-                programNode.children.remove(variableNode)
+        # var nodes
+        for variableNode in set([variableNode for variableNode in variableNodeList if variableNode in programNode.children]):
+            programNode.addVariables(list(set(variableNode.children)))
+            programNode.children.remove(variableNode)
+
+        # assign nodes with creation of variables
+        for assignNode in set([assignNode for assignNode in assignCreationNodeList if assignNode in programNode.children]):
+            programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))

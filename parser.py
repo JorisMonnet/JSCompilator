@@ -111,8 +111,7 @@ def p_creation_list_alone(p):
 
 def p_creation_assignation(p):
     '''statement : varList '=' expression'''
-    #AST.getVariableNode().addVariables([p[1].chidren])
-    p[0] = AST.AssignNode(p[1].children+[p[3]])
+    p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
 def p_structure_while(p):
     ''' structure : WHILE '(' condition ')' '{' programme '}' '''
@@ -180,9 +179,9 @@ if __name__ == "__main__":
     prog = open(sys.argv[1]).read()
     result = yacc.parse(prog)
     if result:
+        AST.recreateVariableNode()
         print (result)
         import os
-        AST.recreateVariableNode()
         graph = result.makegraphicaltree()
         name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
         graph.write_pdf(name)
