@@ -22,6 +22,10 @@ def p_beginning_of_program(p):
     ''' programme : NEWLINE programme'''
     p[0] = p[2]
 
+def p_program_statement(p):
+    '''programmeStatement : statement'''
+    p[0] = AST.ProgramNode([p[1]])
+
 def p_programme_statement(p):
     ''' programme : statement  ';' 
     | statement NEWLINE ''' 
@@ -31,6 +35,10 @@ def p_programme_recursive(p):
     ''' programme : statement ';' programme 
     | statement NEWLINE programme '''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
+
+def p_newline_statement(p):
+    '''statement : NEWLINE statement'''
+    p[0] = p[2]
 
 def p_statement(p):
     ''' statement : assignation
@@ -81,10 +89,18 @@ def p_if_alone(p):
     p[0] = AST.IfNode([p[3],p[7]])
     popscope()
 
+def p_if_without_bracket(p):
+    '''structureIf : IF '(' condition ')' programmeStatement '''
+    p[0] = AST.IfNode([p[3],p[5]])
+
 def p_if_else(p):
     '''structureIfElse : structureIf ELSE '{' new_scope programme '}' '''
     p[0] = AST.IfNode([AST.ElseNode(p[5])]+p[1].children)
     popscope()
+
+def p_if_else_without_bracket(p):
+    '''structureIfElse : structureIf ELSE programmeStatement '''
+    p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
 
 def p_if_elseif(p): 
     '''structure : structureIf ELSE structureIf
@@ -95,6 +111,10 @@ def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' new_scope programme '}' '''
     p[0]=AST.ForNode([p[3],p[5],p[7],p[11]])
     popscope()
+
+def p_for_without_bracket(p):
+    '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
+    p[0]=AST.ForNode([p[3],p[5],p[7],p[9]])
 
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
@@ -128,6 +148,10 @@ def p_do_while(p):
     p[0] = AST.DoNode([p[4],AST.WhileNode([p[8],p[4]])])
     popscope()
 
+def p_do_while_without_bracket(p):
+    '''structure : DO programmeStatement WHILE '(' condition ')' '''
+    p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
+
 def p_statement_log(p):
     ''' statement : LOG expression '''
     p[0] = AST.LogNode(p[2])
@@ -156,6 +180,10 @@ def p_structure_while(p):
     ''' structure : WHILE '(' condition ')' '{' new_scope programme '}' '''
     p[0] = AST.WhileNode([p[3],p[6]])
     popscope()
+
+def p_structure_while_without_bracket(p):
+    ''' structure : WHILE '(' condition ')' programmeStatement '''
+    p[0] = AST.WhileNode([p[3],p[5]])
 
 def p_expression_op(p):
     '''expression : expression ADD_OP expression
