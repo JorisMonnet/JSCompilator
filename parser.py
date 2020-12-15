@@ -8,6 +8,8 @@ class Scope():
 
 listScope = [Scope()]
 
+error = False
+
 def popscope():
     listScope.pop()
 
@@ -90,6 +92,7 @@ def p_switch(p):
         popscope()
     else :
         print(f"{p[3]} is not declared")
+        error = True
 
 def p_case(p):
     '''caseStructure : CASE expression ':' new_scope programme '''
@@ -154,6 +157,7 @@ def p_expression_op_assignation(p):
     if p[1] in listScope[-1].vars:
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
+        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
@@ -162,8 +166,10 @@ def p_expression_op_assign_double(p):
         if p[1] in listScope[-1].vars:
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
+            error = True
             print(f"{p[1]} is not declared")
     else:
+        error = True
         print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
 def p_expression_num(p):
@@ -175,6 +181,7 @@ def p_expression_var(p):
     if p[1] in listScope[-1].vars:
         p[0] = AST.TokenNode(p[1])
     else :
+        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_paren(p):
@@ -194,9 +201,11 @@ def p_assign(p):
     if(p[1] in listScope[-1].vars) : 
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
+        error = True
         print(f"{p[1]} is not declared")
 
 def p_error(p):
+    error = True
     if p:
         print (f"Syntax error in line {p.lineno}")
         parser.errok()
@@ -218,8 +227,9 @@ if __name__ == "__main__":
     import sys
 
     prog = open(sys.argv[1]).read()
-    result = yacc.parse(prog)
-    if result:
+    if not error:
+        result = yacc.parse(prog)
+    elif result :
         AST.recreateVariableNode()
         print (result)
         import os
