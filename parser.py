@@ -6,8 +6,10 @@ listScope = []
 
 class Scope():
     def __init__(self):
-        if(len(listScope)>1):
+        if len(listScope) > 1:
             self.vars = listScope[-1].vars
+        elif len(listScope) == 1:
+            self.vars = listScope[0].vars
         else :
             self.vars = []
 
@@ -109,16 +111,16 @@ def p_if_elseif(p):
 
 def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' new_scope programme '}' '''
-    p[0]=AST.ForNode([p[3],p[5],p[7],p[11]])
+    p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[11]])
     popscope()
 
 def p_for_without_bracket(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
-    p[0]=AST.ForNode([p[3],p[5],p[7],p[9]])
+    p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[9]])
 
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
-    if p[3] in listScope[:-2].vars:
+    if (len(listScope) > 1 and p[3] in listScope[-1].vars) or (len(listScope) == 1 and p[3] in listScope[0].vars):
         p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
         popscope()
     else :
@@ -159,13 +161,13 @@ def p_statement_log(p):
 def p_creation(p):
     '''varCreation : VAR IDENTIFIER
     | LET IDENTIFIER'''
-    listScope[-1].vars.append(p[2])
+    listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
 
 def p_creation_list(p): 
     '''varList : varCreation ',' IDENTIFIER
     |  varList ',' IDENTIFIER'''
-    listScope[-1].vars.append(p[3])
+    listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
     p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
 
 def p_creation_list_alone(p):
@@ -193,7 +195,7 @@ def p_expression_op(p):
 def p_expression_op_assignation(p):
     '''statement : IDENTIFIER ADD_OP '=' expression
     | IDENTIFIER MUL_OP '=' expression'''
-    if p[1] in listScope[-1].vars:
+    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
         error = True
@@ -202,7 +204,7 @@ def p_expression_op_assignation(p):
 def p_expression_op_assign_double(p):
     '''statement : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
-        if p[1] in listScope[-1].vars:
+        if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
             error = True
@@ -216,8 +218,8 @@ def p_expression_num(p):
     p[0] = AST.TokenNode(p[1])
 
 def p_expression_var(p):
-    '''expression : IDENTIFIER '''
-    if p[1] in listScope[-1].vars:
+    '''expression : IDENTIFIER '''        
+    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.TokenNode(p[1])
     else :
         error = True
@@ -237,8 +239,7 @@ def p_minus(p):
 
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
-    listVars = list()
-    if(p[1] in listScope[-1].vars) : 
+    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
         error = True

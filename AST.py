@@ -141,6 +141,12 @@ class IfNode(Node):
 class ElseNode(Node):
     type = 'else'
 
+class startForNode(Node):
+    type = 'start'
+
+class incForNode(Node):
+    type = 'incrementer'
+
 class LogNode(Node):
     type = 'log'
 
