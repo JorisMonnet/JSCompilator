@@ -24,7 +24,7 @@ def p_beginning_of_program(p):
     ''' programme : NEWLINE programme'''
     p[0] = p[2]
 
-def p_program_statement(p):
+def p_programme_statement_alone(p):
     '''programmeStatement : statement'''
     p[0] = AST.ProgramNode([p[1]])
 
@@ -104,11 +104,6 @@ def p_if_else_without_bracket(p):
     '''structureIfElse : structureIf ELSE programmeStatement '''
     p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
 
-def p_if_elseif(p): 
-    '''structure : structureIf ELSE structureIf
-    | structureIf ELSE structureIfElse'''
-    p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
-
 def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' new_scope programme '}' '''
     p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[11]])
@@ -165,7 +160,7 @@ def p_creation(p):
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
 
 def p_creation_list(p): 
-    '''varList : varCreation ',' IDENTIFIER
+    '''varList : varCreation ',' IDENTIFIER 
     |  varList ',' IDENTIFIER'''
     listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
     p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
@@ -253,10 +248,13 @@ def p_error(p):
     else:
         print ("Sytax error: unexpected end of file!")
 
+#http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
+    ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
+    ('nonassoc','LT','GT','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT', 'LTE','GTE'),
     ('left', 'ADD_OP'),
     ('left', 'MUL_OP'),
-    ('right', 'UMINUS'),
+    ('right', 'UMINUS')
 )
 
 def parse(program):
