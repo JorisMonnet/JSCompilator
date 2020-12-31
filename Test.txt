@@ -5,4 +5,7 @@ switch(a){
             log(5)
     case 4 : log(6)
     default : log(7)
+            break;
+            continue
+            continue
 }

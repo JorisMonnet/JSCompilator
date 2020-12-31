@@ -40,7 +40,9 @@ def p_programme_statement_alone(p):
     | varList
     | logStatement
     | opAssignationDouble
-    | opAssignation'''
+    | opAssignation
+    | breakStatement 
+    | continueStatement '''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -68,7 +70,9 @@ def p_statement(p):
     | varList
     | logStatement
     | opAssignationDouble
-    | opAssignation'''
+    | opAssignation
+    | breakStatement
+    | continueStatement '''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -126,6 +130,14 @@ def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeBlock 
     | FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
     p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[9]])
+
+def p_break(p):
+    ''' breakStatement : BREAK '''
+    p[0] = AST.BreakNode()
+
+def p_continue(p):
+    ''' continueStatement : CONTINUE '''
+    p[0] = AST.ContinueNode()
 
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
