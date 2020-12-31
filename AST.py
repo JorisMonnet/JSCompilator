@@ -164,6 +164,9 @@ class SwitchNode(Node):
 
 class CaseNode(Node):
     type='case'
+
+class CaseListNode(Node):
+    type='caseList'
     
 class DefaultNode(Node):
     type='default'

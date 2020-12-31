@@ -1,18 +1,8 @@
-var i
-for(i=0;i<5;i=i+1){
-    log(2)
-    log(4)
+var a = 1
+
+switch(a){
+    case 2 : log(2)
+            log(5)
+    case 4 : log(6)
+    default : log(7)
 }
-for(i=0;i<5;i=i+1) 
-    log(5)
-let a,b = 0
-
-if(a<5)
-    log(2)
-else if(b>2){
-    log(7)
-} else
-    log(6)
-a=6
-
-

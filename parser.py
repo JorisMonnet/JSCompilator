@@ -29,6 +29,11 @@ def p_program_block(p):
     p[0] = p[3]
     popscope()
 
+def p_program_case_block(p):
+    '''caseProgramme : ':' new_scope programme '''
+    p[0] = p[3]
+    popscope()
+
 def p_programme_statement_alone(p):
     '''programmeStatement : assignation
     | structure 
@@ -132,22 +137,24 @@ def p_switch(p):
         error = True
 
 def p_case(p):
-    '''caseStructure : CASE expression ':' new_scope programme '''
-    p[0] = AST.CaseNode([p[2],p[5]])
-    popscope()
+    '''caseStructure : CASE expression caseProgramme '''
+    p[0] = AST.CaseNode([p[2],p[3]])
 
 def p_case_list_alone(p) :
-    '''caseStructureList : caseStructure'''
+    '''caseStructureList : caseStructure '''
     p[0] = p[1]
 
 def p_default(p):
-    '''caseStructure : DEFAULT ':' new_scope programme '''
-    p[0] = AST.DefaultNode([p[4]])
-    popscope()
+    '''defaultStructure : DEFAULT caseProgramme '''
+    p[0] = AST.DefaultNode([p[2]])
 
 def p_case_List(p):
-    '''caseStructureList : caseStructure caseStructureList'''
-    p[0] =  p[1]
+    '''caseStructureList : caseStructureList caseStructure
+    | caseStructureList defaultStructure '''
+    if p[1].type !='case':
+        p[0] = AST.CaseListNode(p[1].children+[p[2]])
+    else :
+        p[0] = AST.CaseListNode([p[1],p[2]])
 
 def p_do_while(p):
     '''structure : DO programmeBlock WHILE '(' condition ')' 
@@ -264,7 +271,6 @@ parser = yacc.yacc(outputdir='generated')
 
 if __name__ == "__main__":
     import sys
-
     prog = open(sys.argv[1]).read()
     if not error:
         result = yacc.parse(prog+"\n")
