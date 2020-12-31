@@ -3,5 +3,16 @@ for(i=0;i<5;i=i+1){
     log(2)
     log(4)
 }
-for(i=0;i<5;i=i+1)
+for(i=0;i<5;i=i+1) 
     log(5)
+let a,b = 0
+
+if(a<5)
+    log(2)
+else if(b>2){
+    log(7)
+} else
+    log(6)
+a=6
+
+
