@@ -25,8 +25,15 @@ def p_beginning_of_program(p):
     p[0] = p[2]
 
 def p_programme_statement_alone(p):
-    '''programmeStatement : statement'''
+    '''programmeStatement : assignation
+    | structure
+    | varList
+    | logStatement'''
     p[0] = AST.ProgramNode([p[1]])
+
+def p_newline_programmeStatement(p):
+    '''programmeStatement : NEWLINE programmeStatement'''
+    p[0] = p[2]
 
 def p_programme_statement(p):
     ''' programme : statement  ';' 
@@ -46,8 +53,8 @@ def p_statement(p):
     ''' statement : assignation
     | structure 
     | structureIf
-    | structureIfElse
-    | varList'''
+    | varList
+    | logStatement'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -92,17 +99,19 @@ def p_if_alone(p):
     popscope()
 
 def p_if_without_bracket(p):
-    '''structureIf : IF '(' condition ')' programmeStatement '''
+    '''structureIf : IF '(' condition ')' programmeStatement
+    | IF '(' condition ')' structureElse '''
     p[0] = AST.IfNode([p[3],p[5]])
 
 def p_if_else(p):
-    '''structureIfElse : structureIf ELSE '{' new_scope programme '}' '''
-    p[0] = AST.IfNode([AST.ElseNode(p[5])]+p[1].children)
+    '''structureElse : ELSE '{' new_scope programme '}' '''
+    p[0] = AST.ElseNode([p[4]])
     popscope()
 
 def p_if_else_without_bracket(p):
-    '''structureIfElse : structureIf ELSE programmeStatement '''
-    p[0] = AST.IfNode([AST.ElseNode(p[3])]+p[1].children)
+    '''structureElse : ELSE programmeStatement
+    | ELSE structureIf '''
+    p[0] = AST.ElseNode([p[2]])
 
 def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' '{' new_scope programme '}' '''
@@ -150,7 +159,7 @@ def p_do_while_without_bracket(p):
     p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
 
 def p_statement_log(p):
-    ''' statement : LOG expression '''
+    ''' logStatement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
 def p_creation(p):
@@ -160,8 +169,7 @@ def p_creation(p):
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
 
 def p_creation_list(p): 
-    '''varList : varCreation ',' IDENTIFIER 
-    |  varList ',' IDENTIFIER'''
+    '''varList : varList ',' IDENTIFIER'''
     listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
     p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
 
