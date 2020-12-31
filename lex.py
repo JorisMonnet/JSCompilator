@@ -11,7 +11,9 @@ reserved_words = (
     'else',
     'switch',
     'case',
-    'default'
+    'default',
+    'break',
+    'continue',
 )
 
 conditions_symbols = (

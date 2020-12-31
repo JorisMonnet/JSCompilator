@@ -150,8 +150,14 @@ class incForNode(Node):
 class LogNode(Node):
     type = 'log'
 
+class BreakNode(Node):
+    type = 'break'
+
+class ContinueNode(Node):
+    type = 'continue'
+     
 class VariableNode(Node):
-    type='variable(s)'
+    type ='variable(s)'
 
 class WhileNode(Node):
     type = 'while'
