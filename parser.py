@@ -187,12 +187,13 @@ def p_creation(p):
 
 def p_array_empty(p):
     '''arrayDeclaration : varCreation '=' '[' ']' '''
-    p[0] = AST.VariableNode(AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))]))
+    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))],True)
 
 def p_array_creation(p):
     '''arrayDeclaration : varCreation '=' '[' tokenList ']' '''
-    p[0] = AST.VariableNode(AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])]))
+    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])],True)
 
+#return a list
 def p_token_list_solo(p):
     '''tokenList : IDENTIFIER
     | NUMBER '''
