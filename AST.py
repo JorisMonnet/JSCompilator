@@ -135,6 +135,7 @@ class AssignNode(Node):
     def __init__(self,children,isCreated=False):
         self.isCreated = isCreated
         super().__init__(children)
+        
 class IfNode(Node):
     type = 'if'
 
@@ -149,6 +150,9 @@ class incForNode(Node):
 
 class LogNode(Node):
     type = 'log'
+
+class ArrayNode(Node):
+    type = 'array'
 
 class BreakNode(Node):
     type = 'break'
@@ -166,28 +170,28 @@ class DoNode(Node):
     type = 'do'
 
 class SwitchNode(Node):
-    type='switch'
+    type = 'switch'
 
 class CaseNode(Node):
-    type='case'
+    type = 'case'
 
 class CaseListNode(Node):
-    type='caseList'
+    type = 'caseList'
     
 class DefaultNode(Node):
-    type='default'
+    type = 'default'
 
 class AndNode(Node):
-    type='&&'
+    type = '&&'
 
 class OrNode(Node):
-    type='||'
+    type = '||'
 
 class NotNode(Node):
-    type='NOT (!)'
-    
+    type = 'NOT (!)'
+     
 class ConditionNode(Node):
-    type='condition'
+    type = 'condition'
 
 class ForNode(Node):
     type = 'for'
@@ -217,3 +221,10 @@ def recreateVariableNode():
         # assign nodes with creation of variables
         for assignNode in set([assignNode for assignNode in assignCreationNodeList if assignNode in programNode.children]):
             programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))
+
+def getArrayNodeById(id):
+    arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'array'])
+    assignNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == '='])
+    for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
+        if id == node.children[0].tok: 
+            return node

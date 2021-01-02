@@ -1,11 +1,14 @@
-var a = 1
+let a = [a,r,t,e]
+var b = [2,5,8,3]
+let c = []
+var e,f,g = 4;
 
-switch(a){
-    case 2 : log(2)
-            log(5)
-    case 4 : log(6)
-    default : log(7)
-            break;
-            continue
-            continue
-}
+log(a[5])
+log(a[4])
+log(a[3])
+log(a[2])
+log(a[1])
+log(a[0])
+log(e[2])
+log(p[9])
+a+-

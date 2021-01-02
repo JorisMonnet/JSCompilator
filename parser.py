@@ -8,10 +8,13 @@ class Scope():
     def __init__(self):
         if len(listScope) > 1:
             self.vars = listScope[-1].vars
+            self.arrayVars = listScope[-1].arrayVars
         elif len(listScope) == 1:
             self.vars = listScope[0].vars
+            self.arrayVars = listScope[0].arrayVars
         else :
             self.vars = []
+            self.arrayVars = []
 
 listScope = [Scope()]
 
@@ -39,10 +42,9 @@ def p_programme_statement_alone(p):
     | structure 
     | varList
     | logStatement
-    | opAssignationDouble
-    | opAssignation
     | breakStatement 
-    | continueStatement '''
+    | continueStatement 
+    | arrayDeclaration'''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -69,10 +71,9 @@ def p_statement(p):
     | structureIf
     | varList
     | logStatement
-    | opAssignationDouble
-    | opAssignation
     | breakStatement
-    | continueStatement '''
+    | continueStatement 
+    | arrayDeclaration'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -125,7 +126,7 @@ def p_else(p):
 def p_if_else(p):
     '''structure : structureIf structureElse '''
     p[0] = AST.IfNode(p[1].children+[p[2]])
-
+    
 def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeBlock 
     | FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
@@ -146,7 +147,10 @@ def p_switch(p):
         popscope()
     else :
         print(f"{p[3]} is not declared")
-        error = True
+
+def p_newline_case(p):
+    '''caseStructureList : NEWLINE caseStructureList'''
+    p[0] = p[2]
 
 def p_case(p):
     '''caseStructure : CASE expression caseProgramme '''
@@ -173,7 +177,7 @@ def p_do_while(p):
     | DO programmeStatement WHILE '(' condition ')' '''
     p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
 
-def p_statement_log(p):
+def p_log(p):
     ''' logStatement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
@@ -182,6 +186,38 @@ def p_creation(p):
     | LET IDENTIFIER'''
     listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+
+def p_array_empty(p):
+    '''arrayDeclaration : varCreation '=' '[' ']' '''
+    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
+    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))],True)
+
+def p_array_creation(p):
+    '''arrayDeclaration : varCreation '=' '[' tokenList ']' '''
+    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
+    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])],True)
+
+def p_array_access(p):
+    ''' expression : IDENTIFIER '[' NUMBER ']' '''
+    if (len(listScope) > 1 and p[1] in listScope[-1].arrayVars) or (len(listScope) == 1 and p[1] in listScope[0].arrayVars) and int(p[3])==p[3]:
+        nodeChildren = AST.getArrayNodeById(p[1]).children
+        if len(nodeChildren) + 1 >= int(p[3]):
+            p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+nodeChildren[1].children[int(p[3])].tok+')')
+        else: 
+            print(f"index out of bounds")
+    else : 
+        print(f"{p[1]} is not declared as array")
+
+#return a list
+def p_token_list_solo(p):
+    '''tokenList : IDENTIFIER
+    | NUMBER '''
+    p[0] = [AST.TokenNode(p[1])]
+
+def p_token_list(p):
+    '''tokenList : tokenList ',' IDENTIFIER
+    | tokenList ',' NUMBER '''
+    p[0] = [AST.TokenNode(p[3])]+p[1]
 
 def p_creation_list(p): 
     '''varList : varList ',' IDENTIFIER'''
@@ -193,7 +229,7 @@ def p_creation_list_alone(p):
     p[0] = p[1]
     
 def p_creation_assignation(p):
-    '''statement : varList '=' expression'''
+    '''assignation : varList '=' expression'''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
 def p_structure_while_without_bracket(p):
@@ -207,24 +243,21 @@ def p_expression_op(p):
     p[0] = AST.OpNode(p[2], [p[1], p[3]])
 
 def p_expression_op_assignation(p):
-    '''opAssignation : IDENTIFIER ADD_OP '=' expression
+    '''assignation : IDENTIFIER ADD_OP '=' expression
     | IDENTIFIER MUL_OP '=' expression '''
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
-    '''opAssignationDouble : IDENTIFIER ADD_OP ADD_OP'''
+    '''assignation : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
         if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
-            error = True
             print(f"{p[1]} is not declared")
     else:
-        error = True
         print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
 def p_expression_num(p):
@@ -236,7 +269,6 @@ def p_expression_var(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.TokenNode(p[1])
     else :
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_paren(p):
@@ -256,7 +288,6 @@ def p_assign(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_error(p):
@@ -284,8 +315,10 @@ parser = yacc.yacc(outputdir='generated')
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
+    if prog and prog[-1]==';': #allow to finish with a ;
+        prog=prog[:-1]
     if not error:
-        result = yacc.parse(prog+"\n")
+        result = yacc.parse(prog+"\n") 
         if result :
             AST.recreateVariableNode()
             print (result)
