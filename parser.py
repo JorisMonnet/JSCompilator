@@ -40,7 +40,8 @@ def p_programme_statement_alone(p):
     | varList
     | logStatement
     | breakStatement 
-    | continueStatement '''
+    | continueStatement 
+    | arrayDeclaration'''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -68,7 +69,8 @@ def p_statement(p):
     | varList
     | logStatement
     | breakStatement
-    | continueStatement '''
+    | continueStatement 
+    | arrayDeclaration'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -121,9 +123,6 @@ def p_else(p):
 def p_if_else(p):
     '''structure : structureIf structureElse '''
     p[0] = AST.IfNode(p[1].children+[p[2]])
-
-def p_aray(p):
-    '''arrayDeclaration : '''
     
 def p_for(p):
     '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeBlock 
@@ -146,6 +145,7 @@ def p_switch(p):
     else :
         print(f"{p[3]} is not declared")
         error = True
+
 def p_newline_case(p):
     '''caseStructureList : NEWLINE caseStructureList'''
     p[0] = p[2]
@@ -184,6 +184,24 @@ def p_creation(p):
     | LET IDENTIFIER'''
     listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+
+def p_array_empty(p):
+    '''arrayDeclaration : varCreation '=' '[' ']' '''
+    p[0] = AST.VariableNode(AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))]))
+
+def p_array_creation(p):
+    '''arrayDeclaration : varCreation '=' '[' tokenList ']' '''
+    p[0] = AST.VariableNode(AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])]))
+
+def p_token_list_solo(p):
+    '''tokenList : IDENTIFIER
+    | NUMBER '''
+    p[0] = [AST.TokenNode(p[1])]
+
+def p_token_list(p):
+    '''tokenList : tokenList ',' IDENTIFIER
+    | tokenList ',' NUMBER '''
+    p[0] = [AST.TokenNode(p[3])]+p[1]
 
 def p_creation_list(p): 
     '''varList : varList ',' IDENTIFIER'''
@@ -286,8 +304,10 @@ parser = yacc.yacc(outputdir='generated')
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
+    if prog and prog[-1]==';': #allow to finish with a ;
+        prog=prog[:-1]
     if not error:
-        result = yacc.parse(prog+"\n")
+        result = yacc.parse(prog+"\n") 
         if result :
             AST.recreateVariableNode()
             print (result)

@@ -135,6 +135,7 @@ class AssignNode(Node):
     def __init__(self,children,isCreated=False):
         self.isCreated = isCreated
         super().__init__(children)
+        
 class IfNode(Node):
     type = 'if'
 
@@ -149,6 +150,9 @@ class incForNode(Node):
 
 class LogNode(Node):
     type = 'log'
+
+class ArrayNode(Node):
+    type = 'array'
 
 class BreakNode(Node):
     type = 'break'
@@ -166,28 +170,28 @@ class DoNode(Node):
     type = 'do'
 
 class SwitchNode(Node):
-    type='switch'
+    type = 'switch'
 
 class CaseNode(Node):
-    type='case'
+    type = 'case'
 
 class CaseListNode(Node):
-    type='caseList'
+    type = 'caseList'
     
 class DefaultNode(Node):
-    type='default'
+    type = 'default'
 
 class AndNode(Node):
-    type='&&'
+    type = '&&'
 
 class OrNode(Node):
-    type='||'
+    type = '||'
 
 class NotNode(Node):
-    type='NOT (!)'
-    
+    type = 'NOT (!)'
+     
 class ConditionNode(Node):
-    type='condition'
+    type = 'condition'
 
 class ForNode(Node):
     type = 'for'
