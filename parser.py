@@ -8,10 +8,13 @@ class Scope():
     def __init__(self):
         if len(listScope) > 1:
             self.vars = listScope[-1].vars
+            self.arrayVars = listScope[-1].arrayVars
         elif len(listScope) == 1:
             self.vars = listScope[0].vars
+            self.arrayVars = listScope[0].arrayVars
         else :
             self.vars = []
+            self.arrayVars = []
 
 listScope = [Scope()]
 
@@ -144,7 +147,6 @@ def p_switch(p):
         popscope()
     else :
         print(f"{p[3]} is not declared")
-        error = True
 
 def p_newline_case(p):
     '''caseStructureList : NEWLINE caseStructureList'''
@@ -187,11 +189,24 @@ def p_creation(p):
 
 def p_array_empty(p):
     '''arrayDeclaration : varCreation '=' '[' ']' '''
+    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
     p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))],True)
 
 def p_array_creation(p):
     '''arrayDeclaration : varCreation '=' '[' tokenList ']' '''
+    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
     p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])],True)
+
+def p_array_access(p):
+    ''' expression : IDENTIFIER '[' NUMBER ']' '''
+    if (len(listScope) > 1 and p[1] in listScope[-1].arrayVars) or (len(listScope) == 1 and p[1] in listScope[0].arrayVars) and int(p[3])==p[3]:
+        nodeChildren = AST.getArrayNodeById(p[1]).children
+        if len(nodeChildren) + 1 >= int(p[3]):
+            p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+nodeChildren[1].children[int(p[3])].tok+')')
+        else: 
+            print(f"index out of bounds")
+    else : 
+        print(f"{p[1]} is not declared as array")
 
 #return a list
 def p_token_list_solo(p):
@@ -233,7 +248,6 @@ def p_expression_op_assignation(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
@@ -242,10 +256,8 @@ def p_expression_op_assign_double(p):
         if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
-            error = True
             print(f"{p[1]} is not declared")
     else:
-        error = True
         print (f"Syntax error : +- or -+ after variable name : {p[1]}")
 
 def p_expression_num(p):
@@ -257,7 +269,6 @@ def p_expression_var(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.TokenNode(p[1])
     else :
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_expression_paren(p):
@@ -277,7 +288,6 @@ def p_assign(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
-        error = True
         print(f"{p[1]} is not declared")
 
 def p_error(p):

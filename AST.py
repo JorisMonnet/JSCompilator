@@ -221,3 +221,10 @@ def recreateVariableNode():
         # assign nodes with creation of variables
         for assignNode in set([assignNode for assignNode in assignCreationNodeList if assignNode in programNode.children]):
             programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))
+
+def getArrayNodeById(id):
+    arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'array'])
+    assignNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == '='])
+    for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
+        if id == node.children[0].tok: 
+            return node
