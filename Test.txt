@@ -1,11 +1,25 @@
-var a = 1
 
-switch(a){
-    case 2 : log(2)
-            log(5)
-    case 4 : log(6)
-    default : log(7)
-            break;
-            continue
-            continue
-}
+log(4)
+
+var a;
+while(a==9 || a==8)
+	switch(a){		
+		case 2 : log(2)
+				log(5)
+		case 4 : log(6)
+		default : log(7)
+				break;
+				continue
+				continue
+	}
+
+var b;
+
+
+
+
+
+
+
+for(var b = 0;a<45;a++)
+	log(2)
