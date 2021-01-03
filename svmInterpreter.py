@@ -40,13 +40,13 @@ def compile(self):
 	return bytecode
 	
 #print
-@addToClass(AST.PrintNode)
+@addToClass(AST.LogNode)
 def compile(self):
 	bytecode = ""
 	bytecode += self.children[0].compile()
 	bytecode += "PRINT\n"
 	return bytecode
-	
+	 
 #operation
 @addToClass(AST.OpNode)
 def compile(self):
@@ -73,8 +73,110 @@ def compile(self):
 	bytecode += "JINZ body%s\n" % counter
 	return bytecode
 	
+
+# #ifNode
+# @addToClass(AST.IfNode)
+# def compile(self):
+# 	return null
+
+# #elseNode
+# @addToClass(AST.ElseNode)
+# def compile(self):
+# 	return null
+
+# #startforNode
+# @addToClass(AST.startForNode)
+# def compile(self):
+# 	return null
+
+# #incForNode
+# @addToClass(AST.incForNode)
+# def compile(self):
+# 	return null
+
+# #logNode
+# @addToClass(AST.LogNode)
+# def compile(self):
+# 	return null
+
+# #arrayNode
+# @addToClass(AST.ArrayNode)
+# def compile(self):
+# 	return null
+
+# #breakNode
+# @addToClass(AST.BreakNode)
+# def compile(self):
+# 	return null
+
+# #continueNode
+# @addToClass(AST.ContinueNode)
+# def compile(self):
+# 	return null
+
+# #variableNode
+# @addToClass(AST.VariableNode)
+# def compile(self):
+# 	return null
+
+# #doNode
+# @addToClass(AST.DoNode)
+# def compile(self):
+# 	return null
+
+# #switchNode
+# @addToClass(AST.SwitchNode)
+# def compile(self):
+# 	return null
+
+# #caseNode
+# @addToClass(AST.CaseNode)
+# def compile(self):
+# 	return null
+
+# #caseListNode
+# @addToClass(AST.CaseListNode)
+# def compile(self):
+# 	return null
+
+# #defaultNode
+# @addToClass(AST.DefaultNode)
+# def compile(self):
+# 	return null
+
+# #andNode
+# @addToClass(AST.AndNode)
+# def compile(self):
+# 	return null
+
+# #orNode
+# @addToClass(AST.OrNode)
+# def compile(self):
+# 	return null
+
+# #notNode
+# @addToClass(AST.NotNode)
+# def compile(self):
+# 	return null
+
+# #conditionNode
+# @addToClass(AST.ConditionNode)
+# def compile(self):
+# 	return null
+
+# #forNode
+# @addToClass(AST.ForNode)
+# def compile(self):
+# 	return null
+
+# #entryNode
+# @addToClass(AST.EntryNode)
+# def compile(self):
+# 	return null
+
+
 if __name__ == "__main__":
-	from parser import parse
+	from parserJS import parse
 	import sys,os
 	prog = open(sys.argv[1]).read()
 	ast = parse(prog)
