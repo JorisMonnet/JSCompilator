@@ -40,7 +40,6 @@ def p_program_case_block(p):
 def p_programme_statement_alone(p):
     '''programmeStatement : assignation
     | structure 
-    | varList
     | logStatement
     | breakStatement 
     | continueStatement 
@@ -69,7 +68,6 @@ def p_statement(p):
     ''' statement : assignation
     | structure 
     | structureIf
-    | varList
     | logStatement
     | breakStatement
     | continueStatement 
@@ -188,14 +186,12 @@ def p_creation(p):
     p[0] = AST.VariableNode([AST.TokenNode(p[2])])
 
 def p_array_empty(p):
-    '''arrayDeclaration : varCreation '=' '[' ']' '''
-    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
-    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(AST.TokenNode('Empty Array'))],True)
+    '''arrayDeclaration : '[' ']' '''
+    p[0] = AST.ArrayNode(AST.TokenNode('Empty Array'))
 
 def p_array_creation(p):
-    '''arrayDeclaration : varCreation '=' '[' tokenList ']' '''
-    listScope[-1 if len(listScope)>1 else 0].arrayVars.append(listScope[-1 if len(listScope)>1 else 0].vars.pop())
-    p[0] = AST.AssignNode(p[1].children+[AST.ArrayNode(p[4])],True)
+    '''arrayDeclaration : '[' tokenList ']' '''
+    p[0] = AST.ArrayNode(p[2])
 
 def p_array_access(p):
     ''' expression : IDENTIFIER '[' NUMBER ']' '''
@@ -229,7 +225,8 @@ def p_creation_list_alone(p):
     p[0] = p[1]
     
 def p_creation_assignation(p):
-    '''assignation : varList '=' expression'''
+    '''assignation : varList '=' expression
+    | varList '=' arrayDeclaration '''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
 def p_structure_while_without_bracket(p):
