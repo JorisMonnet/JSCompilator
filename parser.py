@@ -17,7 +17,7 @@ class Scope():
             self.arrayVars = []
 
 listScope = [Scope()]
-
+listFunctions = []
 error = False
 
 def popscope():
@@ -217,8 +217,11 @@ def p_token_list(p):
 
 def p_creation_list(p): 
     '''varList : varList ',' IDENTIFIER'''
-    listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
-    p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+        p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+    else : 
+        print(f"{p[3]} is already declared")
 
 def p_creation_list_alone(p):
     '''varList : varCreation'''
@@ -294,6 +297,14 @@ def p_error(p):
         parser.errok()
     else:
         print ("Sytax error: unexpected end of file!")
+
+def p_function_creation(p):
+    '''functionDeclaration : FUNCTION IDENTIFIER '(' argList ')' programmeBlock'''
+    p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[4],p[6]])
+
+def p_arglist(p):
+    '''argList : IDENTIFIER'''
+    p[0] = p[1]
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (

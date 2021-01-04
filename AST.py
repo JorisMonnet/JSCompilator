@@ -95,7 +95,10 @@ class Node:
                     edge.set_labelfontcolor(color)
                 graph.add_edge(edge)
             return graph    
-        
+
+class FunctionNode(Node):
+    type = 'Function'
+
 class ProgramNode(Node):
     type = 'Program'
     def __init__(self,children):
