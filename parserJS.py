@@ -22,7 +22,6 @@ class Scope():
 listScope = [Scope()]
 listFunctions = []
 error = False
-numberExpressionList = 0
 
 def popscope():
     listScope.pop()
@@ -355,24 +354,20 @@ def p_function_call_args(p):
     '''functionCall : IDENTIFIER '(' expressionList ')' '''
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
         functionNode = AST.getFunction(p[1])
-        if functionNode.children[0].verifyArgumentsNumber(numberExpressionList):
+        if functionNode.children[0].verifyArgumentsNumber(len(p[3].children)):
             functionNode.children.append(p[3])
             p[0] = functionNode
         else :
-            print(f"ERROR : {p[1]} hasn't {numberExpressionList} arguments")
+            print(f"ERROR : {p[1]} hasn't {len(p[3].children)} arguments")
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_list_solo(p):
     '''expressionList : expression'''
-    global numberExpressionList
-    numberExpressionList = 1
     p[0] = AST.ArgNode([p[1]])
 
 def p_expression_list(p):
     '''expressionList : expressionList ',' expression '''
-    global numberExpressionList
-    numberExpressionList += 1
     p[0] = AST.ArgNode(p[1].children+[p[3]])
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
