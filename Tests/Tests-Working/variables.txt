@@ -6,3 +6,9 @@ let e = [a,r,t,e]
 var f = a
 let g = a*786
 let h = a+8;
+
+function a(b){
+    return b
+}
+
+var z = a(0)

@@ -16,6 +16,7 @@ class Scope():
         else :
             self.vars = []
             self.functionVars = []
+        self.argVars = []
 
 def popscope():
     listScope.pop()
@@ -375,17 +376,17 @@ def p_function_creation_without_arg(p):
     
 def p_arglist(p):
     '''argList : IDENTIFIER'''
-    if p[1] not in listScope[-1 if len(listScope)>1 else 0].vars:
+    if p[1] not in listScope[-1 if len(listScope)>1 else 0].vars: #if the var exist already, it will be erased by local variables : https://www.w3schools.com/js/js_scope.asp
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[1])
-        p[0] = AST.ArgNode([AST.TokenNode(p[1])])
-    else : 
-        error = True
-        print(f"ERROR : {p[1]} is already declared")
+    listScope[-1 if len(listScope)>1 else 0].argVars.append(p[1])
+    p[0] = AST.ArgNode([AST.TokenNode(p[1])])
 
 def p_arglist_recursive(p):
     '''argList : argList ',' IDENTIFIER'''
-    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
-        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+    if p[3] not in listScope[-1 if len(listScope)>1 else 0].argVars :
+        if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
+            listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+        listScope[-1 if len(listScope)>1 else 0].argVars.append(p[3])
         p[0] = AST.ArgNode(p[1].children+[AST.TokenNode(p[3])])
     else : 
         error = True

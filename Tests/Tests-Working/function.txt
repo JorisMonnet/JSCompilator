@@ -1,8 +1,10 @@
+let a=[a,r,f,4,5,6];
+
 function a(arg1){
     log(arg1)
 }
 
-function b(){
+function b(a){
     log(4)
 }
 
@@ -13,6 +15,6 @@ function getPi(){
 var g = getPi()
 var c = 0
 
-b()
+b(2)
 
 c = getPi()
