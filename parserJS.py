@@ -57,7 +57,7 @@ def p_case_program(p):
 
 def p_program_statement(p):
     '''programStatement : assignation
-    | structure 
+    | structure
     | logStatement
     | breakStatement 
     | continueStatement 
@@ -129,9 +129,12 @@ def p_while(p):
     p[0] = AST.WhileNode([p[3],p[5]])
 
 def p_do_while(p):
-    '''structure : DO programBlock WHILE '(' condition ')' 
-    | DO programStatement WHILE '(' condition ')' '''
+    '''structure : DO programBlock WHILE '(' condition ')' '''
     p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
+
+def p_do_while_without_bracket(p):
+    '''structure : DO programStatement NEWLINE WHILE '(' condition ')'  '''
+    p[0] = p[0] = AST.DoNode([p[2],AST.WhileNode([p[6],p[2]])])
 
 #SWITCH
 def p_switch(p):
