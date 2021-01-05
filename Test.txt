@@ -1,5 +1,4 @@
-var a = [a,r,t,e]
-var b = []
-
-var k = a[2]
-var c = k[6]
+if(4 < 5)
+{
+    log(2)
+}

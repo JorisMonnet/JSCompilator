@@ -32,6 +32,10 @@ def p_program_block(p):
     p[0] = p[3]
     popscope()
 
+def p_program_block_indent(p):
+    ''' programmeBlock : NEWLINE programmeBlock'''
+    p[0] = p[2]
+
 def p_program_case_block(p):
     '''caseProgramme : ':' new_scope programme '''
     p[0] = p[3]
@@ -389,7 +393,7 @@ parser = yacc.yacc(outputdir='generated')
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
-    result = yacc.parse(prog) 
+    result = parse(prog) 
     if result and not error:
         AST.recreateVariableNode()
         print (result)
