@@ -54,7 +54,7 @@ class Node:
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
-                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token' and c.type !='Function'
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'Token' and c.type !='Function'
                 if self.type=='Function':
                     c.hasGraphicalTree = True
                 edge = pydot.Edge(self.ID,c.ID)

@@ -98,7 +98,7 @@ def p_statement(p):
 ############################################### STRUCTURE ##########################################################
 #IF
 def p_if(p):
-    '''structureIf : IF '(' condition ')' programmeStatement NEWLINE
+    '''structureIf : IF '(' condition ')' programmeStatement
     | IF '(' condition ')' programmeBlock '''
     p[0] = AST.IfNode([p[3],p[5]])
 
@@ -113,7 +113,7 @@ def p_if_else(p):
     p[0] = AST.IfNode(p[1].children+[p[2]])
 
 def p_ternary_operator(p):
-    '''structure : condition '?' expression ':' expression'''
+    '''structureTernary : condition '?' returnValues ':' returnValues ''' #see returnValues in functions -> expression or arrayDeclaration or functionCall
     p[0] = AST.IfNode([p[1],AST.ProgramNode(p[3]),AST.ElseNode(AST.ProgramNode(p[5]))])
 
 #FOR
@@ -332,9 +332,10 @@ def p_assign(p):
 
 def p_creation_assignation(p):
     '''assignation : varList '=' expression
-    | varList '=' arrayDeclaration '''
+    | varList '=' arrayDeclaration 
+    | varList '=' structureTernary'''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
-    
+
 ####################################################################################################################
 
 ############################################## FUNCTIONS ###########################################################
@@ -343,6 +344,7 @@ def p_function_creation(p):
     if p[2] not in listScope[-1 if len(listScope)>1 else 0].functionVars:
         listScope[-1 if len(listScope)>1 else 0].functionVars.append(p[2])
         p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[5],p[7]])
+        popscope()
     else : 
         print(f"ERROR : {p[2]} is already a declared function")
 
@@ -406,12 +408,15 @@ def p_return(p):
     p[0] = AST.ReturnNode()
 
 def p_return_expression(p):
-    '''returnStatement : RETURN expression
-    | RETURN arrayDeclaration
-    | RETURN condition
-    | RETURN functionCall'''
+    '''returnStatement : RETURN returnValues
+    | RETURN condition'''
     p[0] = AST.ReturnNode([p[2]])
 
+def p_return_values(p):
+    '''returnValues : expression
+    | arrayDeclaration
+    | functionCall'''
+    p[0] = p[1]
 ####################################################################################################################
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27

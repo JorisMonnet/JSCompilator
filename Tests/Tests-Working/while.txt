@@ -1,0 +1,11 @@
+while(4<=6){
+    log(5)
+}
+
+while(2==9)
+{
+    continue
+}
+
+while(7>1)
+    log(7)
