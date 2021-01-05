@@ -1,0 +1,9 @@
+for(let a = 5;a<50;a++){
+    log(2)
+}
+for(let a = 5;a<50;a++)
+{
+    log(2)
+}
+for(let a = 5;a<50;a++)
+    log(2)
