@@ -1,11 +1,11 @@
 while(4<=6){
-    log(5)
+    log(5);
 }
 
 while(2==9)
 {
-    continue
+    continue;
 }
 
 while(7>1)
-    log(7)
+    log(7);

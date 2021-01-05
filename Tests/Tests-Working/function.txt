@@ -14,3 +14,5 @@ var g = getPi()
 var c = 0
 
 b()
+
+c = getPi()

@@ -41,6 +41,10 @@ def p_program_recursive(p):
     | statement NEWLINE program '''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
 
+def p_newscope(p):
+    '''new_scope : '''
+    listScope.append(Scope())
+    
 def p_program_block(p):
     ''' programBlock : '{' new_scope program '}' '''
     p[0] = p[3]
@@ -69,10 +73,6 @@ def p_program_statement(p):
 def p_newline_program_statement(p):
     '''programStatement : NEWLINE programStatement'''
     p[0] = p[2]
-
-def p_newscope(p):
-    '''new_scope : '''
-    listScope.append(Scope())
     
 ####################################################################################################################
 
