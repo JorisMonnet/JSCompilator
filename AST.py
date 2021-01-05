@@ -54,8 +54,8 @@ class Node:
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
-                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token' and c.type !='Argument(s)'
-                if self.type=='Argument(s)':
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token' and c.type !='Function'
+                if self.type=='Function':
                     c.hasGraphicalTree = True
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
@@ -244,5 +244,5 @@ def getFunction(id):
     from functools import reduce
     functionNodes = [dicNode[key] for key in dicNode if dicNode[key].type == 'Function' and dicNode[key].children[0].tok==id]
     if functionNodes:
-        return FunctionCallNode(functionNodes[0].children)
+        return FunctionCallNode(functionNodes[0])
     return None
