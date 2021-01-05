@@ -383,13 +383,6 @@ def p_return_expression(p):
     | RETURN functionCall'''
     p[0] = AST.ReturnNode([p[2]])
 
-# def p_return_functionCall(p):
-#     '''returnStatement : RETURN functionCall'''
-#     functionCalled = AST.getFunction(p[2].children[])
-#     if functionCalled.children[0].hasReturn():
-#         p[0] = AST.ReturnNode([p[2]])
-#     else :
-#         print("ERROR : Function called hasn't got return statement")
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
     ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
