@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from lex import tokens
 import AST
 
+################################################### SCOPE ############################################################
 listScope = []
 
 class Scope():
@@ -16,32 +17,45 @@ class Scope():
             self.vars = []
             self.functionVars = []
 
+def popscope():
+    listScope.pop()
+    
 listScope = [Scope()]
 listFunctions = []
 error = False
 
-def popscope():
-    listScope.pop()
+####################################################################################################################
 
-def p_beginning_of_program(p):
+############################################ PROGRAMMES ############################################################
+def p_newline_programme(p):
     ''' programme : NEWLINE programme'''
     p[0] = p[2]
 
-def p_program_block(p):
+def p_programme(p):
+    ''' programme : statement  ';' 
+    | statement NEWLINE ''' 
+    p[0] = AST.ProgramNode(p[1])
+
+def p_programme_recursive(p):
+    ''' programme : statement ';' programme 
+    | statement NEWLINE programme '''
+    p[0] = AST.ProgramNode([p[1]]+p[3].children)
+
+def p_programme_block(p):
     ''' programmeBlock : '{' new_scope programme '}' '''
     p[0] = p[3]
     popscope()
 
-def p_program_block_indent(p):
+def p_newline_programme_block(p):
     ''' programmeBlock : NEWLINE programmeBlock'''
     p[0] = p[2]
 
-def p_program_case_block(p):
+def p_case_program(p):
     '''caseProgramme : ':' new_scope programme '''
     p[0] = p[3]
     popscope()
 
-def p_programme_statement_alone(p):
+def p_programme_statement(p):
     '''programmeStatement : assignation
     | structure 
     | logStatement
@@ -52,20 +66,17 @@ def p_programme_statement_alone(p):
     | returnStatement'''
     p[0] = AST.ProgramNode([p[1]])
 
-def p_newline_programmeStatement(p):
+def p_newline_programme_statement(p):
     '''programmeStatement : NEWLINE programmeStatement'''
     p[0] = p[2]
 
-def p_programme_statement(p):
-    ''' programme : statement  ';' 
-    | statement NEWLINE ''' 
-    p[0] = AST.ProgramNode(p[1])
+def p_newscope(p):
+    '''new_scope : '''
+    listScope.append(Scope())
+    
+####################################################################################################################
 
-def p_programme_recursive(p):
-    ''' programme : statement ';' programme 
-    | statement NEWLINE programme '''
-    p[0] = AST.ProgramNode([p[1]]+p[3].children)
-
+##################################################### STATEMENT ####################################################
 def p_newline_statement(p):
     '''statement : NEWLINE statement'''
     p[0] = p[2]
@@ -82,15 +93,82 @@ def p_statement(p):
     | functionCall
     | returnStatement'''
     p[0] = p[1]
+####################################################################################################################
+
+############################################### STRUCTURE ##########################################################
+#IF
+def p_if(p):
+    '''structureIf : IF '(' condition ')' programmeStatement NEWLINE
+    | IF '(' condition ')' programmeBlock '''
+    p[0] = AST.IfNode([p[3],p[5]])
+
+def p_else(p):
+    '''structureElse : ELSE programmeStatement 
+    | ELSE structureIf
+    | ELSE programmeBlock '''
+    p[0] = AST.ElseNode([p[2]])
+    
+def p_if_else(p):
+    '''structure : structureIf structureElse '''
+    p[0] = AST.IfNode(p[1].children+[p[2]])
 
 def p_ternary_operator(p):
     '''structure : condition '?' expression ':' expression'''
     p[0] = AST.IfNode([p[1],AST.ProgramNode(p[3]),AST.ElseNode(AST.ProgramNode(p[5]))])
 
-def p_newscope(p):
-    '''new_scope : '''
-    listScope.append(Scope())
+#FOR
+def p_for(p):
+    '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeBlock 
+    | FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
+    p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[9]])
 
+#WHILE
+def p_while(p):
+    ''' structure : WHILE '(' condition ')' programmeStatement 
+    | WHILE '(' condition ')' programmeBlock'''
+    p[0] = AST.WhileNode([p[3],p[5]])
+
+def p_do_while(p):
+    '''structure : DO programmeBlock WHILE '(' condition ')' 
+    | DO programmeStatement WHILE '(' condition ')' '''
+    p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
+
+#SWITCH
+def p_switch(p):
+    '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseList '}' '''
+    if (len(listScope) > 1 and p[3] in listScope[-1].vars) or (len(listScope) == 1 and p[3] in listScope[0].vars):
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
+        popscope()
+    else :
+        print(f"{p[3]} is not declared")
+
+def p_newline_case_list(p):
+    '''caseList : NEWLINE caseList'''
+    p[0] = p[2]
+
+def p_case(p):
+    '''caseStructure : CASE expression caseProgramme '''
+    p[0] = AST.CaseNode([p[2],p[3]])
+
+def p_case_list(p) :
+    '''caseList : caseStructure '''
+    p[0] = p[1]
+
+def p_default(p):
+    '''defaultStructure : DEFAULT caseProgramme '''
+    p[0] = AST.DefaultNode([p[2]])
+
+def p_case_list_recursive(p):
+    '''caseList : caseList caseStructure
+    | caseList defaultStructure '''
+    if p[1].type !='case':
+        p[0] = AST.CaseListNode(p[1].children+[p[2]])
+    else :
+        p[0] = AST.CaseListNode([p[1],p[2]])
+
+####################################################################################################################
+
+############################################## CONDITION ###########################################################
 def p_conditionSymbol(p):
     '''conditionSymbol : LT
     | GT
@@ -119,26 +197,13 @@ def p_condition(p):
     '''condition : expression conditionSymbol expression'''
     p[0] = AST.ConditionNode([p[1],AST.TokenNode(p[2]),p[3]])
 
-def p_if(p):
-    '''structureIf : IF '(' condition ')' programmeStatement NEWLINE
-    | IF '(' condition ')' programmeBlock '''
-    p[0] = AST.IfNode([p[3],p[5]])
+def p_condtition_paren(p):
+    '''condition : '(' condition ')' '''
+    p[0]=p[2]
 
-def p_else(p):
-    '''structureElse : ELSE programmeStatement 
-    | ELSE structureIf
-    | ELSE programmeBlock '''
-    p[0] = AST.ElseNode([p[2]])
-    
-def p_if_else(p):
-    '''structure : structureIf structureElse '''
-    p[0] = AST.IfNode(p[1].children+[p[2]])
-    
-def p_for(p):
-    '''structure : FOR '(' assignation ';' condition ';' assignation ')' programmeBlock 
-    | FOR '(' assignation ';' condition ';' assignation ')' programmeStatement '''
-    p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[9]])
+####################################################################################################################
 
+########################################### WORD STATEMENT #########################################################
 def p_break(p):
     ''' breakStatement : BREAK '''
     p[0] = AST.BreakNode()
@@ -147,48 +212,14 @@ def p_continue(p):
     ''' continueStatement : CONTINUE '''
     p[0] = AST.ContinueNode()
 
-def p_switch(p):
-    '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseStructureList '}' '''
-    if (len(listScope) > 1 and p[3] in listScope[-1].vars) or (len(listScope) == 1 and p[3] in listScope[0].vars):
-        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
-        popscope()
-    else :
-        print(f"{p[3]} is not declared")
-
-def p_newline_case(p):
-    '''caseStructureList : NEWLINE caseStructureList'''
-    p[0] = p[2]
-
-def p_case(p):
-    '''caseStructure : CASE expression caseProgramme '''
-    p[0] = AST.CaseNode([p[2],p[3]])
-
-def p_case_list_alone(p) :
-    '''caseStructureList : caseStructure '''
-    p[0] = p[1]
-
-def p_default(p):
-    '''defaultStructure : DEFAULT caseProgramme '''
-    p[0] = AST.DefaultNode([p[2]])
-
-def p_case_List(p):
-    '''caseStructureList : caseStructureList caseStructure
-    | caseStructureList defaultStructure '''
-    if p[1].type !='case':
-        p[0] = AST.CaseListNode(p[1].children+[p[2]])
-    else :
-        p[0] = AST.CaseListNode([p[1],p[2]])
-
-def p_do_while(p):
-    '''structure : DO programmeBlock WHILE '(' condition ')' 
-    | DO programmeStatement WHILE '(' condition ')' '''
-    p[0] = AST.DoNode([p[2],AST.WhileNode([p[5],p[2]])])
-
 def p_log(p):
     ''' logStatement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
-def p_creation(p):
+####################################################################################################################
+
+################################################## VARIABLES #######################################################
+def p_var_creation(p):
     '''varCreation : VAR IDENTIFIER
     | LET IDENTIFIER'''
     if p[2] not in listScope[-1 if len(listScope)>1 else 0].vars:
@@ -197,13 +228,36 @@ def p_creation(p):
     else : 
         print(f"ERROR : {p[2]} is already declared")
 
+def p_var_creation_list(p):
+    '''varList : varCreation'''
+    p[0] = p[1]
+
+def p_var_creation_list_recursive(p): 
+    '''varList : varList ',' IDENTIFIER'''
+    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+        p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+    else : 
+        print(f"ERROR : {p[3]} is already declared")
+
+#ARRAY
 def p_array_empty(p):
     '''arrayDeclaration : '[' ']' '''
     p[0] = AST.ArrayNode(AST.TokenNode('Empty Array'))
 
-def p_array_creation(p):
+def p_array_declaration(p):
     '''arrayDeclaration : '[' tokenList ']' '''
     p[0] = AST.ArrayNode(p[2])
+
+def p_token_list(p): #return a list of TokenNode
+    '''tokenList : IDENTIFIER
+    | NUMBER '''
+    p[0] = [AST.TokenNode(p[1])]
+
+def p_token_list_recursive(p):
+    '''tokenList : tokenList ',' IDENTIFIER
+    | tokenList ',' NUMBER '''
+    p[0] = [AST.TokenNode(p[3])]+p[1]
 
 def p_array_access(p):
     ''' expression : IDENTIFIER '[' NUMBER ']' '''
@@ -218,44 +272,43 @@ def p_array_access(p):
             print(f"{p[1]} is not declared as array")
     else : 
         print(f"{p[1]} is not declared")
-
-#return a list
-def p_token_list_solo(p):
-    '''tokenList : IDENTIFIER
-    | NUMBER '''
-    p[0] = [AST.TokenNode(p[1])]
-
-def p_token_list(p):
-    '''tokenList : tokenList ',' IDENTIFIER
-    | tokenList ',' NUMBER '''
-    p[0] = [AST.TokenNode(p[3])]+p[1]
-
-def p_creation_list(p): 
-    '''varList : varList ',' IDENTIFIER'''
-    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
-        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
-        p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
-    else : 
-        print(f"ERROR : {p[3]} is already declared")
-
-def p_creation_list_alone(p):
-    '''varList : varCreation'''
-    p[0] = p[1]
     
 def p_creation_assignation(p):
     '''assignation : varList '=' expression
     | varList '=' arrayDeclaration '''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
-def p_structure_while_without_bracket(p):
-    ''' structure : WHILE '(' condition ')' programmeStatement 
-    | WHILE '(' condition ')' programmeBlock'''
-    p[0] = AST.WhileNode([p[3],p[5]])
+####################################################################################################################
 
+############################################## EXPRESSIONS #########################################################
+
+def p_expression_num(p):
+    '''expression : NUMBER '''
+    p[0] = AST.TokenNode(p[1])
+
+def p_expression_var(p):
+    '''expression : IDENTIFIER '''        
+    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
+        p[0] = AST.TokenNode(p[1])
+    else :
+        print(f"{p[1]} is not declared")
+
+def p_expression_paren(p):
+    '''expression : '(' expression ')' '''
+    p[0] = p[2]
+    
 def p_expression_op(p):
     '''expression : expression ADD_OP expression
     | expression MUL_OP expression'''
     p[0] = AST.OpNode(p[2], [p[1], p[3]])
+
+def p_minus(p):
+    ''' expression : ADD_OP expression %prec UMINUS'''
+    p[0] = AST.OpNode(p[1], [p[2]])
+
+####################################################################################################################
+
+################################################### ASSIGNATION ####################################################
 
 def p_expression_op_assignation(p):
     '''assignation : IDENTIFIER ADD_OP '=' expression
@@ -275,29 +328,6 @@ def p_expression_op_assign_double(p):
     else:
         print (f"ERROR : {p[2]}{p[2]} after variable name : {p[1]}")
 
-def p_expression_num(p):
-    '''expression : NUMBER '''
-    p[0] = AST.TokenNode(p[1])
-
-def p_expression_var(p):
-    '''expression : IDENTIFIER '''        
-    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
-        p[0] = AST.TokenNode(p[1])
-    else :
-        print(f"{p[1]} is not declared")
-
-def p_expression_paren(p):
-    '''expression : '(' expression ')' '''
-    p[0] = p[2]
-
-def p_condtition_paren(p):
-    '''condition : '(' condition ')' '''
-    p[0]=p[2]
-
-def p_minus(p):
-    ''' expression : ADD_OP expression %prec UMINUS'''
-    p[0] = AST.OpNode(p[1], [p[2]])
-
 def p_assign(p):
     ''' assignation : IDENTIFIER '=' expression '''
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
@@ -305,14 +335,9 @@ def p_assign(p):
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
-def p_error(p):
-    error = True
-    if p:
-        print (f"Syntax error in line {p.lineno} with {p}")
-        parser.errok()
-    else:
-        print ("Sytax error: unexpected end of file!")
+####################################################################################################################
 
+############################################## FUNCTIONS ###########################################################
 def p_function_creation(p):
     '''functionDeclaration : FUNCTION IDENTIFIER '(' new_scope argList ')' programmeBlock'''
     if p[2] not in listScope[-1 if len(listScope)>1 else 0].functionVars:
@@ -337,7 +362,7 @@ def p_arglist(p):
     else : 
         print(f"ERROR : {p[1]} is already declared")
 
-def p_arglist_multiple(p):
+def p_arglist_recursive(p):
     '''argList : argList ',' IDENTIFIER'''
     if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
@@ -346,17 +371,6 @@ def p_arglist_multiple(p):
         print(f"ERROR : {p[3]} is already declared")
     
 def p_function_call(p):
-    '''functionCall : IDENTIFIER '(' ')' '''
-    if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
-        functionCallNode = AST.getFunction(p[1])
-        if functionCallNode and functionCallNode.children[0].verifyArgumentsNumber(0):
-            p[0] = functionCallNode
-        else :
-           print(f"ERROR : {p[1]} doesn't have this number of arguments") 
-    else : 
-        print(f"ERROR : {p[1]} is not declared")
-
-def p_function_call_args(p):
     '''functionCall : IDENTIFIER '(' expressionList ')' '''
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
         functionCallNode = AST.getFunction(p[1])
@@ -368,11 +382,22 @@ def p_function_call_args(p):
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
-def p_expression_list_solo(p):
+def p_function_call_withous_args(p):
+    '''functionCall : IDENTIFIER '(' ')' '''
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
+        functionCallNode = AST.getFunction(p[1])
+        if functionCallNode and functionCallNode.children[0].verifyArgumentsNumber(0):
+            p[0] = functionCallNode
+        else :
+           print(f"ERROR : {p[1]} doesn't have this number of arguments") 
+    else : 
+        print(f"ERROR : {p[1]} is not declared")
+
+def p_expression_list(p):
     '''expressionList : expression'''
     p[0] = AST.ArgNode([p[1]])
 
-def p_expression_list(p):
+def p_expression_list_recursive(p):
     '''expressionList : expressionList ',' expression '''
     p[0] = AST.ArgNode(p[1].children+[p[3]])
 
@@ -387,6 +412,8 @@ def p_return_expression(p):
     | RETURN functionCall'''
     p[0] = AST.ReturnNode([p[2]])
 
+####################################################################################################################
+
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
     ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
@@ -396,6 +423,14 @@ precedence = (
     ('right', 'UMINUS')
 )
 
+def p_error(p):
+    error = True
+    if p:
+        print (f"Syntax error in line {p.lineno} with {p}")
+        parser.errok()
+    else:
+        print ("Sytax error: unexpected end of file!")
+        
 def parse(program):
     if program[-1]==';': #allow to finish with a ;
         program=program[:-1]
@@ -411,8 +446,8 @@ if __name__ == "__main__":
         AST.recreateVariableNode()
         if AST.verifyReturnNode():
             print (result)
-            import os
             graph = result.makegraphicaltree()
+            import os
             name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
             graph.write_pdf(name)
             print ("wrote ast to", name)

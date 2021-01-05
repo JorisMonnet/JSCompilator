@@ -15,7 +15,7 @@ reserved_words = (
     'break',
     'continue',
     'function',
-    'return',
+    'return'
 )
 
 conditions_symbols = (
