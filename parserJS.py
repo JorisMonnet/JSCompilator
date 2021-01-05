@@ -22,6 +22,7 @@ class Scope():
 listScope = [Scope()]
 listFunctions = []
 error = False
+numberExpressionList = 0
 
 def popscope():
     listScope.pop()
@@ -319,7 +320,7 @@ def p_function_creation_without_arg(p):
     '''functionDeclaration : FUNCTION IDENTIFIER '(' ')' programmeBlock'''
     if p[2] not in listScope[-1 if len(listScope)>1 else 0].functionVars:
         listScope[-1 if len(listScope)>1 else 0].functionVars.append(p[2])
-        p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[5]])
+        p[0] = AST.FunctionNode([AST.TokenNode(p[2]),AST.ArgNode(AST.TokenNode('No Arguments')),p[5]])
     else : 
         print(f"ERROR : {p[2]} is already a declared function")
     
@@ -343,28 +344,36 @@ def p_function_call(p):
     '''functionCall : IDENTIFIER '(' ')' '''
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
         functionNode = AST.getFunction(p[1])
-        if functionNode and len(functionNode.children)>0:
+        if functionNode and functionNode.children[0].verifyArgumentsNumber(0):
             p[0] = functionNode
         else :
-           print(f"ERROR : {p[1]} doesn't have any arguments") 
+           print(f"ERROR : {p[1]} doesn't have this number of arguments") 
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
 def p_function_call_args(p):
     '''functionCall : IDENTIFIER '(' expressionList ')' '''
-    p[3]
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
-        p[0] = AST.getFunction(p[1])
+        functionNode = AST.getFunction(p[1])
+        if functionNode.children[0].verifyArgumentsNumber(numberExpressionList):
+            functionNode.children.append(p[3])
+            p[0] = functionNode
+        else :
+            print(f"ERROR : {p[1]} hasn't {numberExpressionList} arguments")
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_list_solo(p):
     '''expressionList : expression'''
-    p[0] = [p[1]]
+    global numberExpressionList
+    numberExpressionList = 1
+    p[0] = AST.ArgNode([p[1]])
 
 def p_expression_list(p):
     '''expressionList : expressionList ',' expression '''
-    p[0] = p[1].append(p[3])
+    global numberExpressionList
+    numberExpressionList += 1
+    p[0] = AST.ArgNode(p[1].children+[p[3]])
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
@@ -376,24 +385,23 @@ precedence = (
 )
 
 def parse(program):
-    return yacc.parse(program)
+    if program[-1]==';': #allow to finish with a ;
+        program=program[:-1]
+    return yacc.parse(program+"\n")
 
 parser = yacc.yacc(outputdir='generated')
 
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
-    if prog and prog[-1]==';': #allow to finish with a ;
-        prog=prog[:-1]
-    if not error:
-        result = yacc.parse(prog+"\n") 
-        if result :
-            AST.recreateVariableNode()
-            print (result)
-            import os
-            graph = result.makegraphicaltree()
-            name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
-            graph.write_pdf(name)
-            print ("wrote ast to", name)
-        else:
-            print ("Parsing returned no result!")
+    result = yacc.parse(prog) 
+    if result and not error:
+        AST.recreateVariableNode()
+        print (result)
+        import os
+        graph = result.makegraphicaltree()
+        name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
+        graph.write_pdf(name)
+        print ("wrote ast to", name)
+    else:
+        print ("Parsing returned no result!")

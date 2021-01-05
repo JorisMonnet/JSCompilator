@@ -5,8 +5,6 @@ function essai2(){
     log(3)
 }
 essai(0,5)
-essai(0)
-essai()
+essai(0,1*9)
 essai2()
 var k = 0
-essai2(k)
