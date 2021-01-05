@@ -112,13 +112,20 @@ class ProgramNode(Node):
             self.variableNode.children.extend(variables)
    
 class TokenNode(Node):
-    type = 'token'
+    type = 'Token'
     def __init__(self, tok):
         Node.__init__(self)
         self.tok = tok
         
     def __repr__(self):
         return repr(self.tok)
+
+class EntryNode(Node):
+    type = 'ENTRY'
+    def __init__(self):
+        Node.__init__(self, None)
+
+####################################################################################################################
 
 class FunctionNode(Node):
     type = 'Function'
@@ -135,7 +142,9 @@ class FunctionCallNode(Node):
 
 class ArgNode(Node):
     type = 'Argument(s)'
-    
+
+####################################################################################################################
+
 class OpNode(Node):
     def __init__(self, op, children):
         Node.__init__(self,children)
@@ -146,59 +155,71 @@ class OpNode(Node):
             self.nbargs = 1
         
     def __repr__(self):
-        return "%s (%s)" % (self.op, self.nbargs)
+        return f"{self.op}"
 
 class AssignNode(Node):
     type = '='
     def __init__(self,children,isCreated=False):
         self.isCreated = isCreated
         super().__init__(children)
-        
-class IfNode(Node):
-    type = 'if'
 
-class ElseNode(Node):
-    type = 'else'
-
-class startForNode(Node):
-    type = 'start'
-
-class incForNode(Node):
-    type = 'incrementer'
-
-class LogNode(Node):
-    type = 'log'
+class VariableNode(Node):
+    type ='Variable(s)'
 
 class ArrayNode(Node):
-    type = 'array'
+    type = 'Array'
 
-class BreakNode(Node):
-    type = 'break'
+####################################################################################################################
 
-class ContinueNode(Node):
-    type = 'continue'
-     
-class VariableNode(Node):
-    type ='variable(s)'
+class IfNode(Node):
+    type = 'If'
+
+class ElseNode(Node):
+    type = 'Else'
+
+class ForNode(Node):
+    type = 'For'
+
+class startForNode(Node):
+    type = 'Start'
+
+class incForNode(Node):
+    type = 'Incrementer'
 
 class WhileNode(Node):
-    type = 'while'
+    type = 'While'
 
 class DoNode(Node):
-    type = 'do'
+    type = 'Do'
 
 class SwitchNode(Node):
-    type = 'switch'
+    type = 'Switch'
 
 class CaseNode(Node):
-    type = 'case'
+    type = 'Case'
 
 class CaseListNode(Node):
-    type = 'caseList'
+    type = 'CaseList'
     
 class DefaultNode(Node):
-    type = 'default'
+    type = 'Default'
 
+####################################################################################################################
+
+class LogNode(Node):
+    type = 'Log'
+
+class BreakNode(Node):
+    type = 'Break'
+
+class ContinueNode(Node):
+    type = 'Continue'
+
+####################################################################################################################
+
+class ConditionNode(Node):
+    type = 'Condition'
+    
 class AndNode(Node):
     type = '&&'
 
@@ -207,17 +228,8 @@ class OrNode(Node):
 
 class NotNode(Node):
     type = 'NOT (!)'
-     
-class ConditionNode(Node):
-    type = 'condition'
 
-class ForNode(Node):
-    type = 'for'
-
-class EntryNode(Node):
-    type = 'ENTRY'
-    def __init__(self):
-        Node.__init__(self, None)
+####################################################################################################################
     
 def addToClass(cls):
     def decorator(func):
@@ -226,6 +238,7 @@ def addToClass(cls):
     return decorator
                     
 def recreateVariableNode():
+    """ replace all variables under one variable node per scope (per programmeNode)"""
     programNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Program'])
     variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)'])
     assignCreationNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == '=' and dicNode[key].isCreated])
@@ -241,6 +254,7 @@ def recreateVariableNode():
             programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))
 
 def getArrayNodeById(id):
+    """ return the ArrayNode corresponding to the given id"""
     arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'array'])
     assignNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == '='])
     for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
@@ -248,13 +262,16 @@ def getArrayNodeById(id):
             return node
 
 def getFunction(id):
+    """ return a functioncallNode containing the function Node from the given id"""
     from functools import reduce
     functionNodes = [dicNode[key] for key in dicNode if dicNode[key].type == 'Function' and dicNode[key].children[0].tok==id]
     if functionNodes:
         return FunctionCallNode(functionNodes[0])
     return None
 
+
 def verifyReturnNode():
+    """ verify if all return nodes are in programmes block from function nodes"""
     returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
     functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
     functionProgrammsNodes = []

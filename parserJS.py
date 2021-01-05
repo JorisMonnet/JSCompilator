@@ -272,11 +272,6 @@ def p_array_access(p):
             print(f"{p[1]} is not declared as array")
     else : 
         print(f"{p[1]} is not declared")
-    
-def p_creation_assignation(p):
-    '''assignation : varList '=' expression
-    | varList '=' arrayDeclaration '''
-    p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
 ####################################################################################################################
 
@@ -335,6 +330,11 @@ def p_assign(p):
     else : 
         print(f"ERROR : {p[1]} is not declared")
 
+def p_creation_assignation(p):
+    '''assignation : varList '=' expression
+    | varList '=' arrayDeclaration '''
+    p[0] = AST.AssignNode(p[1].children+[p[3]],True)
+    
 ####################################################################################################################
 
 ############################################## FUNCTIONS ###########################################################
