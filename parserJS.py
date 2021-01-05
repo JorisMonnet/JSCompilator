@@ -140,7 +140,8 @@ def p_switch(p):
         p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
         popscope()
     else :
-        print(f"{p[3]} is not declared")
+        error = True
+        print(f"ERROR :{p[3]} is not declared")
 
 def p_newline_case_list(p):
     '''caseList : NEWLINE caseList'''
@@ -226,6 +227,7 @@ def p_var_creation(p):
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
         p[0] = AST.VariableNode([AST.TokenNode(p[2])])
     else : 
+        error = True
         print(f"ERROR : {p[2]} is already declared")
 
 def p_var_creation_list(p):
@@ -238,6 +240,7 @@ def p_var_creation_list_recursive(p):
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
         p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
     else : 
+        error = True
         print(f"ERROR : {p[3]} is already declared")
 
 #ARRAY
@@ -267,11 +270,14 @@ def p_array_access(p):
             if len(node.children) + 1 >= int(p[3]):
                 p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
             else: 
-                print(f"index out of bounds")
+                error = True
+                print(f"ERROR : index out of bounds")
         else : 
-            print(f"{p[1]} is not declared as array")
+            error = True
+            print(f"ERROR : {p[1]} is not declared as array")
     else : 
-        print(f"{p[1]} is not declared")
+        error = True
+        print(f"ERROR : {p[1]} is not declared")
 
 ####################################################################################################################
 
@@ -286,7 +292,8 @@ def p_expression_var(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.TokenNode(p[1])
     else :
-        print(f"{p[1]} is not declared")
+        error = True
+        print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_paren(p):
     '''expression : '(' expression ')' '''
@@ -311,6 +318,7 @@ def p_expression_op_assignation(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
+        error = True
         print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
@@ -319,8 +327,10 @@ def p_expression_op_assign_double(p):
         if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
-            print(f"{p[1]} is not declared")
+            error = True
+            print(f"ERROR : {p[1]} is not declared")
     else:
+        error = True
         print (f"ERROR : {p[2]}{p[2]} after variable name : {p[1]}")
 
 def p_assign(p):
@@ -328,6 +338,7 @@ def p_assign(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
+        error = True
         print(f"ERROR : {p[1]} is not declared")
 
 def p_creation_assignation(p):
@@ -346,6 +357,7 @@ def p_function_creation(p):
         p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[5],p[7]])
         popscope()
     else : 
+        error = True
         print(f"ERROR : {p[2]} is already a declared function")
 
 def p_function_creation_without_arg(p):
@@ -354,6 +366,7 @@ def p_function_creation_without_arg(p):
         listScope[-1 if len(listScope)>1 else 0].functionVars.append(p[2])
         p[0] = AST.FunctionNode([AST.TokenNode(p[2]),AST.ArgNode(AST.TokenNode('No Arguments')),p[5]])
     else : 
+        error = True
         print(f"ERROR : {p[2]} is already a declared function")
     
 def p_arglist(p):
@@ -362,6 +375,7 @@ def p_arglist(p):
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[1])
         p[0] = AST.ArgNode([AST.TokenNode(p[1])])
     else : 
+        error = True
         print(f"ERROR : {p[1]} is already declared")
 
 def p_arglist_recursive(p):
@@ -370,6 +384,7 @@ def p_arglist_recursive(p):
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
         p[0] = AST.ArgNode(p[1].children+[AST.TokenNode(p[3])])
     else : 
+        error = True
         print(f"ERROR : {p[3]} is already declared")
     
 def p_function_call(p):
@@ -380,8 +395,10 @@ def p_function_call(p):
             functionCallNode.children.append(p[3])
             p[0] = functionCallNode
         else :
+            error = True
             print(f"ERROR : {p[1]} hasn't {len(p[3].children)} arguments")
     else : 
+        error = True
         print(f"ERROR : {p[1]} is not declared")
 
 def p_function_call_withous_args(p):
@@ -391,8 +408,10 @@ def p_function_call_withous_args(p):
         if functionCallNode and functionCallNode.children[0].verifyArgumentsNumber(0):
             p[0] = functionCallNode
         else :
-           print(f"ERROR : {p[1]} doesn't have this number of arguments") 
+            error = True
+            print(f"ERROR : {p[1]} doesn't have this number of arguments") 
     else : 
+        error = True
         print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_list(p):
