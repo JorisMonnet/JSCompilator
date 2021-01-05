@@ -1,3 +1,4 @@
+
 function essai3(c){
     log(4)
 }
@@ -19,3 +20,9 @@ essai(0,5)
 essai2()
 var k = 0
 essai3(k)
+
+if(4 < 5)
+{
+    log(2)
+}
+
