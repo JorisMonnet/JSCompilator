@@ -1,0 +1,13 @@
+function a(arg1){
+    log(arg1)
+}
+
+function b(){
+    log(4)
+}
+
+function getPi(){
+    return 3.1415926
+}
+
+var c = 0

@@ -471,7 +471,7 @@ if __name__ == "__main__":
     result = parse(prog) 
     if result and not error:
         AST.recreateVariableNode()
-        if AST.verifyReturnNode():
+        if AST.verifyNode():
             print (result)
             graph = result.makegraphicaltree()
             import os

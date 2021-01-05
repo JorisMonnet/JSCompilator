@@ -273,6 +273,7 @@ def getFunction(id):
 def verifyReturnNode():
     """ verify if all return nodes are in programmes block from function nodes"""
     returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
+    if returnNodes == None : return True
     functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
     functionProgrammsNodes = []
     for functionNode in functionNodes:
@@ -283,3 +284,59 @@ def verifyReturnNode():
             print("ERROR : return outside of a function")
             return False
     return True
+
+def verifyBreakContinueNode():
+    """ verify if all continue nodes are in loops and all break nodes are in structures"""
+    continueNodes = []
+    breakNodes = []
+    switchNodes = []
+    loopNodesToCheck = []   
+
+    for key in dicNode:                         #more efficient than 5 list comprehension, only one loop
+        if dicNode[key].type == 'Continue':
+            continueNodes.append(dicNode[key])
+        elif dicNode[key].type == 'Break':
+            breakNodes.append(dicNode[key])
+        elif dicNode[key].type == 'For':
+            loopNodesToCheck.extend(dicNode[key].children[2].children)
+        elif dicNode[key].type == 'Switch':
+            switchNodes.append(dicNode[key])
+        elif dicNode[key].type == 'While':      # do while have the same program
+            loopNodesToCheck.extend(dicNode[key].children[1].children)
+
+    if continueNodes == None and breakNodes == None : return True
+    for continueNode in continueNodes:
+        nodeVerified = False
+        for loopNode in loopNodesToCheck:
+            if checkInChildren(loopNode,continueNode):
+                nodeVerified = True
+        if not nodeVerified:
+            print("ERROR : Continue Node outside of a loop")
+            return False
+    
+    nodesToCheck = loopNodesToCheck+switchNodes
+
+    for breakNode in breakNodes:
+        nodeVerified = False
+        for nodeToCheck in nodesToCheck:
+            if checkInChildren(nodeToCheck,breakNode):
+                nodeVerified = True
+        if not nodeVerified:
+            print("ERROR : Break Node outside of a loop or switch")
+            return False
+
+    return True
+
+def checkInChildren(nodeToCheck,nodeSearched):
+    if nodeToCheck==nodeSearched:
+        return True
+    if nodeToCheck.children == None:
+        return False
+    for c in nodeToCheck.children:
+         if checkInChildren(c,nodeSearched):
+             return True
+    return False
+
+
+def verifyNode():
+    return verifyReturnNode() and verifyBreakContinueNode()
