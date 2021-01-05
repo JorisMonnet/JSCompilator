@@ -8,15 +8,12 @@ class Scope():
     def __init__(self):
         if len(listScope) > 1:
             self.vars = listScope[-1].vars
-            self.arrayVars = listScope[-1].arrayVars
             self.functionVars = listScope[-1].functionVars
         elif len(listScope) == 1:
             self.vars = listScope[0].vars
-            self.arrayVars = listScope[0].arrayVars
             self.functionVars = listScope[0].functionVars
         else :
             self.vars = []
-            self.arrayVars = []
             self.functionVars = []
 
 listScope = [Scope()]
@@ -34,6 +31,10 @@ def p_program_block(p):
     ''' programmeBlock : '{' new_scope programme '}' '''
     p[0] = p[3]
     popscope()
+
+def p_program_block_indent(p):
+    ''' programmeBlock : NEWLINE programmeBlock'''
+    p[0] = p[2]
 
 def p_program_case_block(p):
     '''caseProgramme : ':' new_scope programme '''
@@ -204,14 +205,17 @@ def p_array_creation(p):
 
 def p_array_access(p):
     ''' expression : IDENTIFIER '[' NUMBER ']' '''
-    if (len(listScope) > 1 and p[1] in listScope[-1].arrayVars) or (len(listScope) == 1 and p[1] in listScope[0].arrayVars) and int(p[3])==p[3]:
-        nodeChildren = AST.getArrayNodeById(p[1]).children
-        if len(nodeChildren) + 1 >= int(p[3]):
-            p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+nodeChildren[1].children[int(p[3])].tok+')')
-        else: 
-            print(f"index out of bounds")
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars and int(p[3])==p[3]:
+        node = AST.getArrayNodeById(p[1])
+        if node :
+            if len(node.children) + 1 >= int(p[3]):
+                p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
+            else: 
+                print(f"index out of bounds")
+        else : 
+            print(f"{p[1]} is not declared as array")
     else : 
-        print(f"{p[1]} is not declared as array")
+        print(f"{p[1]} is not declared")
 
 #return a list
 def p_token_list_solo(p):
@@ -389,7 +393,7 @@ parser = yacc.yacc(outputdir='generated')
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
-    result = yacc.parse(prog) 
+    result = parse(prog) 
     if result and not error:
         AST.recreateVariableNode()
         print (result)

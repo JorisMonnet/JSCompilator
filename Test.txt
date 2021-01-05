@@ -1,12 +1,4 @@
-function essai(a,b) {
+if(4 < 5)
+{
     log(2)
 }
-function essai2(){
-    log(3)
-}
-essai(0,5)
-essai(0)
-essai()
-essai2()
-var k = 0
-essai2(k)
