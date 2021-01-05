@@ -342,9 +342,9 @@ def p_arglist_multiple(p):
 def p_function_call(p):
     '''functionCall : IDENTIFIER '(' ')' '''
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
-        functionNode = AST.getFunction(p[1])
-        if functionNode and functionNode.children[0].verifyArgumentsNumber(0):
-            p[0] = functionNode
+        functionCallNode = AST.getFunction(p[1])
+        if functionCallNode and functionCallNode.children[0].verifyArgumentsNumber(0):
+            p[0] = functionCallNode
         else :
            print(f"ERROR : {p[1]} doesn't have this number of arguments") 
     else : 
@@ -353,10 +353,10 @@ def p_function_call(p):
 def p_function_call_args(p):
     '''functionCall : IDENTIFIER '(' expressionList ')' '''
     if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
-        functionNode = AST.getFunction(p[1])
-        if functionNode.children[0].verifyArgumentsNumber(len(p[3].children)):
-            functionNode.children.append(p[3])
-            p[0] = functionNode
+        functionCallNode = AST.getFunction(p[1])
+        if functionCallNode.children[0].verifyArgumentsNumber(len(p[3].children)):
+            functionCallNode.children.append(p[3])
+            p[0] = functionCallNode
         else :
             print(f"ERROR : {p[1]} hasn't {len(p[3].children)} arguments")
     else : 
