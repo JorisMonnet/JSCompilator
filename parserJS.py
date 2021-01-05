@@ -47,7 +47,8 @@ def p_programme_statement_alone(p):
     | breakStatement 
     | continueStatement 
     | arrayDeclaration
-    | functionCall'''
+    | functionCall
+    | returnStatement'''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -77,7 +78,8 @@ def p_statement(p):
     | continueStatement 
     | arrayDeclaration
     | functionDeclaration
-    | functionCall'''
+    | functionCall
+    | returnStatement'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -370,6 +372,24 @@ def p_expression_list(p):
     '''expressionList : expressionList ',' expression '''
     p[0] = AST.ArgNode(p[1].children+[p[3]])
 
+def p_return(p):
+    '''returnStatement : RETURN '''
+    p[0] = AST.ReturnNode()
+
+def p_return_expression(p):
+    '''returnStatement : RETURN expression
+    | RETURN arrayDeclaration
+    | RETURN condition
+    | RETURN functionCall'''
+    p[0] = AST.ReturnNode([p[2]])
+
+# def p_return_functionCall(p):
+#     '''returnStatement : RETURN functionCall'''
+#     functionCalled = AST.getFunction(p[2].children[])
+#     if functionCalled.children[0].hasReturn():
+#         p[0] = AST.ReturnNode([p[2]])
+#     else :
+#         print("ERROR : Function called hasn't got return statement")
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
     ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
