@@ -240,7 +240,7 @@ def addToClass(cls):
 def recreateVariableNode():
     """ replace all variables under one variable node per scope (per programmeNode)"""
     programNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Program'])
-    variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'variable(s)'])
+    variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Variable(s)'])
     assignCreationNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == '=' and dicNode[key].isCreated])
 
     for programNode in programNodeList:
@@ -255,7 +255,7 @@ def recreateVariableNode():
 
 def getArrayNodeById(id):
     """ return the ArrayNode corresponding to the given id"""
-    arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'array'])
+    arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Array'])
     assignNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == '='])
     for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
         if id == node.children[0].tok: 
