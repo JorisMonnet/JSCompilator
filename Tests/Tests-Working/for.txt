@@ -7,3 +7,10 @@ for(let b = 5;b==200*9;b+=6)
 }
 for(let c = 5;c>50&&c<150;c--)
     log(2)
+
+let d = 0
+for(d=1;d<2;d+=0.041){
+    log(456)
+}
+var a = 5
+log(a)

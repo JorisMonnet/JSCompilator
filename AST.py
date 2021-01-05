@@ -298,7 +298,7 @@ def verifyBreakContinueNode():
         elif dicNode[key].type == 'Break':
             breakNodes.append(dicNode[key])
         elif dicNode[key].type == 'For':
-            loopNodesToCheck.extend(dicNode[key].children[2].children)
+            loopNodesToCheck.extend(dicNode[key].children[3].children)
         elif dicNode[key].type == 'Switch':
             switchNodes.append(dicNode[key])
         elif dicNode[key].type == 'While':      # do while have the same program
