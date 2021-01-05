@@ -402,14 +402,15 @@ parser = yacc.yacc(outputdir='generated')
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
-    result = yacc.parse(prog) 
+    result = parse(prog) 
     if result and not error:
         AST.recreateVariableNode()
-        print (result)
-        import os
-        graph = result.makegraphicaltree()
-        name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
-        graph.write_pdf(name)
-        print ("wrote ast to", name)
+        if AST.verifyReturnNode():
+            print (result)
+            import os
+            graph = result.makegraphicaltree()
+            name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
+            graph.write_pdf(name)
+            print ("wrote ast to", name)
     else:
-        print ("Parsing returned no result!")
+        print ("Parsing Error")
