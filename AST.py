@@ -126,7 +126,7 @@ class FunctionNode(Node):
         if nb == 0:
             return self.children[1].children[0].tok == 'No Arguments'
         return len(self.children[1].children) == nb
-        
+
 class FunctionCallNode(Node):
     type = 'FunctionCall'
 
