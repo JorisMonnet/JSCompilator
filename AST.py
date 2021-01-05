@@ -125,7 +125,15 @@ class FunctionNode(Node):
     def verifyArgumentsNumber(self,nb):
         if nb == 0:
             return self.children[1].children[0].tok == 'No Arguments'
-        return len(self.children[1].children) == nb
+        return len(self.children[1].children) == nb and self.children[1].children[0].tok != 'No Arguments'
+    def hasReturn(self):
+        for c in self.children[2].children:
+            if c.type=='Return':
+                return True
+        return False
+
+class ReturnNode(Node):
+    type = 'Return'
 
 class FunctionCallNode(Node):
     type = 'FunctionCall'
