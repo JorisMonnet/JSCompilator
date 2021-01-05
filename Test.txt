@@ -1,12 +1,5 @@
-function essai(a,b) {
-    log(2)
-}
-function essai2(){
-    log(3)
-}
-essai(0,5)
-essai(0)
-essai()
-essai2()
-var k = 0
-essai2(k)
+var a = [a,r,t,e]
+var b = []
+
+var k = a[2]
+var c = k[6]
