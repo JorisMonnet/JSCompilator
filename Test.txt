@@ -15,7 +15,6 @@ function essai2(){
     return essai(4,8)
     return [0,2,5,8]
 }
-return 2;
 essai(0,5)
 essai2()
 var k = 0

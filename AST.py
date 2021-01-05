@@ -265,3 +265,4 @@ def verifyReturnNode():
         if returnNode not in functionProgrammsNodes:
             print("ERROR : return outside of a function")
             return False
+    return True
