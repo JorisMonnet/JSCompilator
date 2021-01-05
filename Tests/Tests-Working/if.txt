@@ -1,0 +1,25 @@
+if(2<5){
+    log(2)
+} else if (1==5){
+    log(3)
+} else {
+    log(4)
+}
+
+if(2<5)
+    log(2)
+else if (1==5)
+    log(3)
+else
+    log(4)
+
+if(2<5){
+    log(2)
+} else if (1==5)
+    log(3)
+else {
+    log(4)
+}
+
+if(2<=9)
+    break;
