@@ -345,8 +345,7 @@ def p_assign(p):
         print(f"ERROR : {p[1]} is not declared")
 
 def p_creation_assignation(p):
-    '''assignation : varList '=' expression
-    | varList '=' arrayDeclaration 
+    '''assignation : varList '=' returnValues
     | varList '=' structureTernary'''
     p[0] = AST.AssignNode(p[1].children+[p[3]],True)
 
