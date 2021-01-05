@@ -54,7 +54,9 @@ class Node:
             for i, c in enumerate(self.children):
                 if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
-                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token'
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'token' and c.type !='Argument(s)'
+                if self.type=='Argument(s)':
+                    c.hasGraphicalTree = True
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -96,9 +98,6 @@ class Node:
                 graph.add_edge(edge)
             return graph    
 
-class FunctionNode(Node):
-    type = 'Function'
-
 class ProgramNode(Node):
     type = 'Program'
     def __init__(self,children):
@@ -120,6 +119,15 @@ class TokenNode(Node):
         
     def __repr__(self):
         return repr(self.tok)
+
+class FunctionNode(Node):
+    type = 'Function'
+
+class FunctionCallNode(Node):
+    type = 'FunctionCall'
+
+class ArgNode(Node):
+    type = 'Argument(s)'
     
 class OpNode(Node):
     def __init__(self, op, children):
@@ -231,3 +239,10 @@ def getArrayNodeById(id):
     for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
         if id == node.children[0].tok: 
             return node
+
+def getFunction(id):
+    from functools import reduce
+    functionNodes = [dicNode[key] for key in dicNode if dicNode[key].type == 'Function' and dicNode[key].children[0].tok==id]
+    if functionNodes:
+        return FunctionCallNode(functionNodes[0].children)
+    return None

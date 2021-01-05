@@ -9,12 +9,15 @@ class Scope():
         if len(listScope) > 1:
             self.vars = listScope[-1].vars
             self.arrayVars = listScope[-1].arrayVars
+            self.functionVars = listScope[-1].functionVars
         elif len(listScope) == 1:
             self.vars = listScope[0].vars
             self.arrayVars = listScope[0].arrayVars
+            self.functionVars = listScope[0].functionVars
         else :
             self.vars = []
             self.arrayVars = []
+            self.functionVars = []
 
 listScope = [Scope()]
 listFunctions = []
@@ -43,7 +46,8 @@ def p_programme_statement_alone(p):
     | logStatement
     | breakStatement 
     | continueStatement 
-    | arrayDeclaration'''
+    | arrayDeclaration
+    | functionCall'''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -71,7 +75,9 @@ def p_statement(p):
     | logStatement
     | breakStatement
     | continueStatement 
-    | arrayDeclaration'''
+    | arrayDeclaration
+    | functionDeclaration
+    | functionCall'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -182,8 +188,11 @@ def p_log(p):
 def p_creation(p):
     '''varCreation : VAR IDENTIFIER
     | LET IDENTIFIER'''
-    listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
-    p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+    if p[2] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
+        p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+    else : 
+        print(f"ERROR : {p[2]} is already declared")
 
 def p_array_empty(p):
     '''arrayDeclaration : '[' ']' '''
@@ -221,7 +230,7 @@ def p_creation_list(p):
         listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
         p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
     else : 
-        print(f"{p[3]} is already declared")
+        print(f"ERROR : {p[3]} is already declared")
 
 def p_creation_list_alone(p):
     '''varList : varCreation'''
@@ -248,7 +257,7 @@ def p_expression_op_assignation(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
-        print(f"{p[1]} is not declared")
+        print(f"ERROR : {p[1]} is not declared")
 
 def p_expression_op_assign_double(p):
     '''assignation : IDENTIFIER ADD_OP ADD_OP'''
@@ -258,7 +267,7 @@ def p_expression_op_assign_double(p):
         else : 
             print(f"{p[1]} is not declared")
     else:
-        print (f"Syntax error : +- or -+ after variable name : {p[1]}")
+        print (f"ERROR : {p[2]}{p[2]} after variable name : {p[1]}")
 
 def p_expression_num(p):
     '''expression : NUMBER '''
@@ -288,7 +297,7 @@ def p_assign(p):
     if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
-        print(f"{p[1]} is not declared")
+        print(f"ERROR : {p[1]} is not declared")
 
 def p_error(p):
     error = True
@@ -299,12 +308,63 @@ def p_error(p):
         print ("Sytax error: unexpected end of file!")
 
 def p_function_creation(p):
-    '''functionDeclaration : FUNCTION IDENTIFIER '(' argList ')' programmeBlock'''
-    p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[4],p[6]])
+    '''functionDeclaration : FUNCTION IDENTIFIER '(' new_scope argList ')' programmeBlock'''
+    if p[2] not in listScope[-1 if len(listScope)>1 else 0].functionVars:
+        listScope[-1 if len(listScope)>1 else 0].functionVars.append(p[2])
+        p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[5],p[7]])
+    else : 
+        print(f"ERROR : {p[2]} is already a declared function")
 
+def p_function_creation_without_arg(p):
+    '''functionDeclaration : FUNCTION IDENTIFIER '(' ')' programmeBlock'''
+    if p[2] not in listScope[-1 if len(listScope)>1 else 0].functionVars:
+        listScope[-1 if len(listScope)>1 else 0].functionVars.append(p[2])
+        p[0] = AST.FunctionNode([AST.TokenNode(p[2]),p[5]])
+    else : 
+        print(f"ERROR : {p[2]} is already a declared function")
+    
 def p_arglist(p):
     '''argList : IDENTIFIER'''
-    p[0] = p[1]
+    if p[1] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[1])
+        p[0] = AST.ArgNode([AST.TokenNode(p[1])])
+    else : 
+        print(f"ERROR : {p[1]} is already declared")
+
+def p_arglist_multiple(p):
+    '''argList : argList ',' IDENTIFIER'''
+    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+        p[0] = AST.ArgNode(p[1].children+[AST.TokenNode(p[3])])
+    else : 
+        print(f"ERROR : {p[3]} is already declared")
+    
+def p_function_call(p):
+    '''functionCall : IDENTIFIER '(' ')' '''
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
+        functionNode = AST.getFunction(p[1])
+        if functionNode and len(functionNode.children)>0:
+            p[0] = functionNode
+        else :
+           print(f"ERROR : {p[1]} doesn't have any arguments") 
+    else : 
+        print(f"ERROR : {p[1]} is not declared")
+
+def p_function_call_args(p):
+    '''functionCall : IDENTIFIER '(' expressionList ')' '''
+    p[3]
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].functionVars:
+        p[0] = AST.getFunction(p[1])
+    else : 
+        print(f"ERROR : {p[1]} is not declared")
+
+def p_expression_list_solo(p):
+    '''expressionList : expression'''
+    p[0] = [p[1]]
+
+def p_expression_list(p):
+    '''expressionList : expressionList ',' expression '''
+    p[0] = p[1].append(p[3])
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
