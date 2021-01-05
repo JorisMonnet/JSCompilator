@@ -1,12 +1,12 @@
-# coding: latin-1
+# coding: UTF-8
 
 ''' Petit module utilitaire pour la construction, la manipulation et la 
-repr�sentation d'arbres syntaxiques abstraits.
+représentation d'arbres syntaxiques abstraits.
 
-S�rement plein de bugs et autres surprises. � prendre comme un 
+Sûrement plein de bugs et autres surprises. à prendre comme un 
 "work in progress"...
-Notamment, l'utilisation de pydot pour repr�senter un arbre syntaxique cousu
-est une utilisation un peu "limite" de graphviz. �a marche, mais le layout n'est
+Notamment, l'utilisation de pydot pour représenter un arbre syntaxique cousu
+est une utilisation un peu "limite" de graphviz. ça marche, mais le layout n'est
 pas toujours optimal...
 '''
 dicNode = {}
@@ -85,10 +85,10 @@ class Node:
                 edge = pydot.Edge(self.ID,c.ID)
                 edge.set_color(color)
                 edge.set_arrowsize('.5')
-                # Les arr�tes correspondant aux coutures ne sont pas prises en compte
-                # pour le layout du graphe. Ceci permet de garder l'arbre dans sa repr�sentation
+                # Les arrêtes correspondant aux coutures ne sont pas prises en compte
+                # pour le layout du graphe. Ceci permet de garder l'arbre dans sa représentation
                 # "standard", mais peut provoquer des surprises pour le trajet parfois un peu
-                # tarabiscot� des coutures...
+                # tarabiscoté des coutures...
                 # En commantant cette ligne, le layout sera bien meilleur, mais l'arbre nettement
                 # moins reconnaissable.
                 edge.set_constraint('false') 
@@ -125,7 +125,10 @@ class FunctionNode(Node):
     def verifyArgumentsNumber(self,nb):
         if nb == 0:
             return self.children[1].children[0].tok == 'No Arguments'
-        return len(self.children[1].children) == nb
+        return len(self.children[1].children) == nb and self.children[1].children[0].tok != 'No Arguments'
+
+class ReturnNode(Node):
+    type = 'Return'
 
 class FunctionCallNode(Node):
     type = 'FunctionCall'
@@ -250,3 +253,15 @@ def getFunction(id):
     if functionNodes:
         return FunctionCallNode(functionNodes[0])
     return None
+
+def verifyReturnNode():
+    returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
+    functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
+    functionProgrammsNodes = []
+    for functionNode in functionNodes:
+        functionProgrammsNodes.extend(functionNode.children[2].children)
+        
+    for returnNode in returnNodes:
+        if returnNode not in functionProgrammsNodes:
+            print("ERROR : return outside of a function")
+            return False

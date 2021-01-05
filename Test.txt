@@ -1,4 +1,28 @@
+
+function essai3(c){
+    log(4)
+}
+
+function essai(a,b) {
+    log(2)
+    return 2*9
+    return a<5
+    return
+    return essai3(2)
+}
+function essai2(){
+    log(3)
+    return essai(4,8)
+    return [0,2,5,8]
+}
+return 2;
+essai(0,5)
+essai2()
+var k = 0
+essai3(k)
+
 if(4 < 5)
 {
     log(2)
 }
+

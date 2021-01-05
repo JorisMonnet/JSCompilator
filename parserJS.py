@@ -48,7 +48,8 @@ def p_programme_statement_alone(p):
     | breakStatement 
     | continueStatement 
     | arrayDeclaration
-    | functionCall'''
+    | functionCall
+    | returnStatement'''
     p[0] = AST.ProgramNode([p[1]])
 
 def p_newline_programmeStatement(p):
@@ -78,7 +79,8 @@ def p_statement(p):
     | continueStatement 
     | arrayDeclaration
     | functionDeclaration
-    | functionCall'''
+    | functionCall
+    | returnStatement'''
     p[0] = p[1]
 
 def p_ternary_operator(p):
@@ -374,6 +376,17 @@ def p_expression_list(p):
     '''expressionList : expressionList ',' expression '''
     p[0] = AST.ArgNode(p[1].children+[p[3]])
 
+def p_return(p):
+    '''returnStatement : RETURN '''
+    p[0] = AST.ReturnNode()
+
+def p_return_expression(p):
+    '''returnStatement : RETURN expression
+    | RETURN arrayDeclaration
+    | RETURN condition
+    | RETURN functionCall'''
+    p[0] = AST.ReturnNode([p[2]])
+
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
     ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
@@ -396,11 +409,12 @@ if __name__ == "__main__":
     result = parse(prog) 
     if result and not error:
         AST.recreateVariableNode()
-        print (result)
-        import os
-        graph = result.makegraphicaltree()
-        name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
-        graph.write_pdf(name)
-        print ("wrote ast to", name)
+        if AST.verifyReturnNode():
+            print (result)
+            import os
+            graph = result.makegraphicaltree()
+            name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
+            graph.write_pdf(name)
+            print ("wrote ast to", name)
     else:
-        print ("Parsing returned no result!")
+        print ("Parsing Error")
