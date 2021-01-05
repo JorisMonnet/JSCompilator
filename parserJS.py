@@ -139,7 +139,7 @@ def p_do_while_without_bracket(p):
 #SWITCH
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseList '}' '''
-    if (len(listScope) > 1 and p[3] in listScope[-1].vars) or (len(listScope) == 1 and p[3] in listScope[0].vars):
+    if p[3] in listScope[-1 if len(listScope)>1 else 0].vars:
         p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
         popscope()
     else :
@@ -292,7 +292,7 @@ def p_expression_num(p):
 
 def p_expression_var(p):
     '''expression : IDENTIFIER '''        
-    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars:
         p[0] = AST.TokenNode(p[1])
     else :
         error = True
@@ -317,8 +317,10 @@ def p_minus(p):
 
 def p_expression_op_assignation(p):
     '''assignation : IDENTIFIER ADD_OP '=' expression
-    | IDENTIFIER MUL_OP '=' expression '''
-    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
+    | IDENTIFIER MUL_OP '=' expression 
+    | IDENTIFIER ADD_OP '=' functionCall
+    | IDENTIFIER MUL_OP '=' functionCall'''
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars:
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), p[4]])])
     else : 
         error = True
@@ -327,7 +329,7 @@ def p_expression_op_assignation(p):
 def p_expression_op_assign_double(p):
     '''assignation : IDENTIFIER ADD_OP ADD_OP'''
     if p[2]==p[3]:
-        if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
+        if p[1] in listScope[-1 if len(listScope)>1 else 0].vars:
             p[0] = AST.AssignNode([AST.TokenNode(p[1]),AST.OpNode(p[2], [AST.TokenNode(p[1]), AST.TokenNode('1')])])
         else : 
             error = True
@@ -337,8 +339,8 @@ def p_expression_op_assign_double(p):
         print (f"ERROR : {p[2]}{p[2]} after variable name : {p[1]}")
 
 def p_assign(p):
-    ''' assignation : IDENTIFIER '=' expression '''
-    if (len(listScope) > 1 and p[1] in listScope[-1].vars) or (len(listScope) == 1 and p[1] in listScope[0].vars):
+    ''' assignation : IDENTIFIER '=' returnValues '''
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars:
         p[0] = AST.AssignNode([AST.TokenNode(p[1]),p[3]])
     else : 
         error = True
