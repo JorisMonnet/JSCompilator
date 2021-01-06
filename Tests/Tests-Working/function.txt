@@ -4,7 +4,7 @@ function a(arg1){
     log(arg1)
 }
 
-function b(a){
+function bLog(a){
     log(4)
 }
 
@@ -15,6 +15,6 @@ function getPi(){
 var g = getPi()
 var c = 0
 
-b(2)
+bLog(2)
 
 c = getPi()

@@ -10,10 +10,10 @@ class Scope():
     def __init__(self):
         if len(listScope) > 1:
             self.vars = deepcopy(listScope[-1].vars)
-            self.functionVars = deepcopy(listScope[-1].functionVars)
+            self.functionVars = listScope[-1].functionVars
         elif len(listScope) == 1:
             self.vars = deepcopy(listScope[0].vars)
-            self.functionVars = deepcopy(listScope[0].functionVars)
+            self.functionVars = listScope[0].functionVars
         else :
             self.vars = []
             self.functionVars = []
@@ -67,7 +67,6 @@ def p_program_statement(p):
     | logStatement
     | breakStatement 
     | continueStatement 
-    | arrayDeclaration
     | functionCall
     | returnStatement'''
     p[0] = AST.ProgramNode([p[1]])
@@ -407,7 +406,7 @@ def p_function_call(p):
             print(f"ERROR : {p[1]} hasn't {len(p[3].children)} arguments")
     else : 
         error = True
-        print(f"ERROR : {p[1]} is not declared")
+        print(f"ERROR : {p[1]} is not a declared function")
 
 def p_function_call_withous_args(p):
     '''functionCall : IDENTIFIER '(' ')' '''
@@ -420,7 +419,7 @@ def p_function_call_withous_args(p):
             print(f"ERROR : {p[1]} doesn't have this number of arguments") 
     else : 
         error = True
-        print(f"ERROR : {p[1]} is not declared")
+        print(f"ERROR : {p[1]} is not a declared function")
 
 def p_expression_list(p):
     '''expressionList : expression'''
