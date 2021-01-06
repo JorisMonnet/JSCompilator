@@ -1,7 +1,6 @@
 import ply.yacc as yacc
 from lex import tokens
 import AST
-
 from copy import deepcopy
 
 ################################################### SCOPE ############################################################
@@ -225,6 +224,42 @@ def p_log(p):
     ''' logStatement : LOG expression '''
     p[0] = AST.LogNode(p[2])
 
+####################################################################################################################
+
+################################################## VARIABLES #######################################################
+def p_var_creation(p):
+    '''varCreation : VAR IDENTIFIER
+    | LET IDENTIFIER'''
+    if p[2] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[2])
+        p[0] = AST.VariableNode([AST.TokenNode(p[2])])
+    else : 
+        error = True
+        print(f"ERROR : {p[2]} is already declared")
+
+def p_var_creation_list(p):
+    '''varList : varCreation'''
+    p[0] = p[1]
+
+def p_var_creation_list_recursive(p): 
+    '''varList : varList ',' IDENTIFIER'''
+    if p[3] not in listScope[-1 if len(listScope)>1 else 0].vars:
+        listScope[-1 if len(listScope)>1 else 0].vars.append(p[3])
+        p[0]= AST.VariableNode([AST.TokenNode(p[3])]+p[1].children)
+    else : 
+        error = True
+        print(f"ERROR : {p[3]} is already declared")
+
+#ARRAY
+def p_array_empty(p):
+    '''arrayDeclaration : '[' ']' '''
+    p[0] = AST.ArrayNode(AST.TokenNode('Empty Array'))
+
+def p_array_declaration(p):
+    '''arrayDeclaration : '[' tokenList ']' '''
+    p[0] = AST.ArrayNode(p[2])
+
+def p_token_list(p): #return a list of TokenNode
     '''tokenList : IDENTIFIER
     | NUMBER '''
     p[0] = [AST.TokenNode(p[1])]

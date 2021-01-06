@@ -2,7 +2,6 @@
 
 ''' Petit module utilitaire pour la construction, la manipulation et la 
 représentation d'arbres syntaxiques abstraits.
-
 Sûrement plein de bugs et autres surprises. à prendre comme un 
 "work in progress"...
 Notamment, l'utilisation de pydot pour représenter un arbre syntaxique cousu
