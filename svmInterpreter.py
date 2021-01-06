@@ -8,7 +8,6 @@ operations = {
 	'/' : 'DIV'
 }
 
-
 def condcounter():
 	condcounter.current += 1
 	return condcounter.current
@@ -78,15 +77,32 @@ def compile(self):
 	
 #conditionNode
 @addToClass(AST.ConditionNode)
-def compile(self):
-	ccounter = condcounter()
+def compile(self,ccounter):
 	bytecode = ""
-	bytecode += "JMP cond%s\n" % ccounter
-	bytecode += "while%s: " % wcounter
-	bytecode += self.children[1].compile()
 	bytecode += "cond%s: " % ccounter
-	bytecode += self.children[0].compile()
-	bytecode += "JINZ while%s\n" % wcounter
+	leftMember=self.children[0].tok
+	rightMember=self.children[2].tok
+	opMember=self.children[1].tok
+	tempStock=2
+
+	# if opMember=="<":
+	# 	if leftMember < rightMember :
+	# elif opMember=="<=":
+
+	# elif opMember==">":
+
+	# elif opMember==">=":
+
+	# elif opMember=="===":
+
+	# elif opMember=="!==":
+
+	# elif opMember=="==":
+
+	# elif opMember=="!=":
+	
+	
+
 	return bytecode
 
 #while
@@ -98,8 +114,7 @@ def compile(self):
 	bytecode += "JMP cond%s\n" % ccounter
 	bytecode += "while%s: " % wcounter
 	bytecode += self.children[1].compile()
-	bytecode += "cond%s: " % ccounter
-	bytecode += self.children[0].compile()
+	bytecode+= self.children[0].compile(ccounter)
 	bytecode += "JINZ while%s\n" % wcounter
 	return bytecode
 	
@@ -136,7 +151,7 @@ def compile(self):
 @addToClass(AST.IfNode)
 def compile(self):
 	bytecode = ""
-	bytecode += self.children[0].compile()
+	bytecode += self.children[0].compile(condcounter())
 	bytecode += self.children[1].compile()
 	return bytecode
 

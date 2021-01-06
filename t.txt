@@ -1,9 +1,10 @@
 
 
-var a=5
+var a=1
 
-while(a<6){
+while(a<=6){
     log(41)
+    a*=2
 }
 
 
