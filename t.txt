@@ -1,7 +1,12 @@
 
 
-function test2 (){
-    log(10)
-    return 5
+var a=5
+
+while(a<6){
+    log(41)
 }
 
+
+if(a<6){
+    log(81)
+}

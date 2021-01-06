@@ -76,6 +76,19 @@ def compile(self):
 		bytecode += operations[self.op] + "\n"
 	return bytecode
 	
+#conditionNode
+@addToClass(AST.ConditionNode)
+def compile(self):
+	ccounter = condcounter()
+	bytecode = ""
+	bytecode += "JMP cond%s\n" % ccounter
+	bytecode += "while%s: " % wcounter
+	bytecode += self.children[1].compile()
+	bytecode += "cond%s: " % ccounter
+	bytecode += self.children[0].compile()
+	bytecode += "JINZ while%s\n" % wcounter
+	return bytecode
+
 #while
 @addToClass(AST.WhileNode)
 def compile(self):
@@ -119,6 +132,13 @@ def compile(self):
 	return bytecode
 
 
+#ifNode
+@addToClass(AST.IfNode)
+def compile(self):
+	bytecode = ""
+	bytecode += self.children[0].compile()
+	bytecode += self.children[1].compile()
+	return bytecode
 
 if __name__ == "__main__":
 	from parserJS import parse
