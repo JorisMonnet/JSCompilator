@@ -1,0 +1,8 @@
+function getPi(){
+    log(3)
+}
+let c = [getPi()]
+
+let a = 0
+let d = a[0]
+

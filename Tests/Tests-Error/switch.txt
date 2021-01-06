@@ -1,0 +1,15 @@
+let a=5;
+switch(a<5){
+    case 1: log(1)
+        break
+    case 2: log(2);
+        break;
+    default : log(999)
+}
+switch(a){
+    case 1<5: log(1)
+        break
+    case 2: log(2);
+        break;
+    default : log(999)
+}

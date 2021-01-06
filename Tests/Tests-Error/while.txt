@@ -1,0 +1,6 @@
+let a =2
+while(a){
+    log(2)
+}
+while(b=2)
+    log(4)

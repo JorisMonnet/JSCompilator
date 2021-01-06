@@ -1,0 +1,4 @@
+var a;
+b++
+var a = 5
+let a = 6

@@ -1,0 +1,4 @@
+var a = []
+var b = [a,d,f,s,p]
+log(b[0])
+log(b[4])

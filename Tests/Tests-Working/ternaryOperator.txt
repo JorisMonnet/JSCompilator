@@ -1,0 +1,8 @@
+function f(){
+    return 4
+}
+
+let a = 5;
+var k = (a==5)?2:3;
+let c = a===9?[a,r,te,iop]:4
+let r = a<5 || k>8 ? f():0;
