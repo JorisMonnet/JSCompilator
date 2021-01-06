@@ -1,24 +1,26 @@
-# coding: latin-1
+# coding: UTF-8
 
 ''' Petit module utilitaire pour la construction, la manipulation et la 
-représentation d'arbres syntaxiques abstraits.
+reprÃ©sentation d'arbres syntaxiques abstraits.
 
-Sûrement plein de bugs et autres surprises. À prendre comme un 
+SÃ»rement plein de bugs et autres surprises. Ã  prendre comme un 
 "work in progress"...
-Notamment, l'utilisation de pydot pour représenter un arbre syntaxique cousu
-est une utilisation un peu "limite" de graphviz. Ça marche, mais le layout n'est
+Notamment, l'utilisation de pydot pour reprÃ©senter un arbre syntaxique cousu
+est une utilisation un peu "limite" de graphviz. Ã§a marche, mais le layout n'est
 pas toujours optimal...
 '''
+dicNode = {}
 
 import pydot
-
 class Node:
     count = 0
     type = 'Node (unspecified)'
     shape = 'ellipse'
     def __init__(self,children=None):
         self.ID = str(Node.count)
+        self.hasGraphicalTree=False
         Node.count+=1
+        dicNode[self.ID]= self
         if not children: self.children = []
         elif hasattr(children,'__len__'):
             self.children = children
@@ -45,12 +47,16 @@ class Node:
     def __repr__(self):
         return self.type
     
-    def makegraphicaltree(self, dot=None, edgeLabels=True):
+    def makegraphicaltree(self, dot=None, edgeLabels=True, firstTime = False):
             if not dot: dot = pydot.Dot()
             dot.add_node(pydot.Node(self.ID,label=repr(self), shape=self.shape))
             label = edgeLabels and len(self.children)-1
             for i, c in enumerate(self.children):
+                if c.hasGraphicalTree: return
                 c.makegraphicaltree(dot, edgeLabels)
+                c.hasGraphicalTree = c.type != 'Program' and c.type != 'Token' and c.type !='Function'
+                if self.type=='Function':
+                    c.hasGraphicalTree = True
                 edge = pydot.Edge(self.ID,c.ID)
                 if label:
                     edge.set_label(str(i))
@@ -79,10 +85,10 @@ class Node:
                 edge = pydot.Edge(self.ID,c.ID)
                 edge.set_color(color)
                 edge.set_arrowsize('.5')
-                # Les arrêtes correspondant aux coutures ne sont pas prises en compte
-                # pour le layout du graphe. Ceci permet de garder l'arbre dans sa représentation
+                # Les arrÃªtes correspondant aux coutures ne sont pas prises en compte
+                # pour le layout du graphe. Ceci permet de garder l'arbre dans sa reprÃ©sentation
                 # "standard", mais peut provoquer des surprises pour le trajet parfois un peu
-                # tarabiscoté des coutures...
+                # tarabiscotÃ© des coutures...
                 # En commantant cette ligne, le layout sera bien meilleur, mais l'arbre nettement
                 # moins reconnaissable.
                 edge.set_constraint('false') 
@@ -91,19 +97,54 @@ class Node:
                     edge.set_labelfontcolor(color)
                 graph.add_edge(edge)
             return graph    
-        
+
 class ProgramNode(Node):
     type = 'Program'
-        
+    def __init__(self,children):
+        self.variableNode = None
+        super().__init__(children)
+
+    def addVariables(self,variables):
+        if not self.variableNode : 
+            self.variableNode = VariableNode(variables)
+            self.children.insert(0,self.variableNode)
+        else:
+            self.variableNode.children.extend(variables)
+   
 class TokenNode(Node):
-    type = 'token'
+    type = 'Token'
     def __init__(self, tok):
         Node.__init__(self)
         self.tok = tok
         
     def __repr__(self):
         return repr(self.tok)
-    
+
+class EntryNode(Node):
+    type = 'ENTRY'
+    def __init__(self):
+        Node.__init__(self, None)
+
+####################################################################################################################
+
+class FunctionNode(Node):
+    type = 'Function'
+    def verifyArgumentsNumber(self,nb):
+        if nb == 0:
+            return self.children[1].children[0].tok == 'No Arguments'
+        return len(self.children[1].children) == nb and self.children[1].children[0].tok != 'No Arguments'
+
+class ReturnNode(Node):
+    type = 'Return'
+
+class FunctionCallNode(Node):
+    type = 'FunctionCall'
+
+class ArgNode(Node):
+    type = 'Argument(s)'
+
+####################################################################################################################
+
 class OpNode(Node):
     def __init__(self, op, children):
         Node.__init__(self,children)
@@ -114,35 +155,191 @@ class OpNode(Node):
             self.nbargs = 1
         
     def __repr__(self):
-        return "%s (%s)" % (self.op, self.nbargs)
-    
+        return f"{self.op}"
+
 class AssignNode(Node):
     type = '='
-    
-class PrintNode(Node):
-    type = 'print'
-    
+    def __init__(self,children,isCreated=False):
+        self.isCreated = isCreated
+        super().__init__(children)
+
+class VariableNode(Node):
+    type ='Variable(s)'
+
+class ArrayNode(Node):
+    type = 'Array'
+
+####################################################################################################################
+
+class IfNode(Node):
+    type = 'If'
+
+class ElseNode(Node):
+    type = 'Else'
+
+class ForNode(Node):
+    type = 'For'
+
+class startForNode(Node):
+    type = 'Start'
+
+class incForNode(Node):
+    type = 'Incrementer'
+
 class WhileNode(Node):
-    type = 'while'
+    type = 'While'
+
+class DoNode(Node):
+    type = 'Do'
+
+class SwitchNode(Node):
+    type = 'Switch'
+
+class CaseNode(Node):
+    type = 'Case'
+
+class CaseListNode(Node):
+    type = 'CaseList'
     
-class EntryNode(Node):
-    type = 'ENTRY'
-    def __init__(self):
-        Node.__init__(self, None)
+class DefaultNode(Node):
+    type = 'Default'
+
+####################################################################################################################
+
+class LogNode(Node):
+    type = 'Log'
+
+class BreakNode(Node):
+    type = 'Break'
+
+class ContinueNode(Node):
+    type = 'Continue'
+
+####################################################################################################################
+
+class ConditionNode(Node):
+    type = 'Condition'
+    
+class AndNode(Node):
+    type = '&&'
+
+class OrNode(Node):
+    type = '||'
+
+class NotNode(Node):
+    type = 'NOT (!)'
+
+####################################################################################################################
     
 def addToClass(cls):
-    ''' Décorateur permettant d'ajouter la fonction décorée en tant que méthode
-    à une classe.
-    
-    Permet d'implémenter une forme élémentaire de programmation orientée
-    aspects en regroupant les méthodes de différentes classes implémentant
-    une même fonctionnalité en un seul endroit.
-    
-    Attention, après utilisation de ce décorateur, la fonction décorée reste dans
-    le namespace courant. Si cela dérange, on peut utiliser del pour la détruire.
-    Je ne sais pas s'il existe un moyen d'éviter ce phénomène.
-    '''
     def decorator(func):
         setattr(cls,func.__name__,func)
         return func
     return decorator
+                    
+def recreateVariableNode():
+    """ replace all variables under one variable node per scope (per programmeNode)"""
+    programNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Program'])
+    variableNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Variable(s)'])
+    assignCreationNodeList = set([dicNode[key] for key in dicNode if dicNode[key].type == '=' and dicNode[key].isCreated])
+
+    for programNode in programNodeList:
+        # var nodes
+        for variableNode in set([variableNode for variableNode in variableNodeList if variableNode in programNode.children]):
+            programNode.addVariables(list(set(variableNode.children)))
+            programNode.children.remove(variableNode)
+
+        # assign nodes with creation of variables
+        for assignNode in set([assignNode for assignNode in assignCreationNodeList if assignNode in programNode.children]):
+            programNode.addVariables(list(set(assignNode.children[:len(assignNode.children)-1])))
+
+def getArrayNodeById(id):
+    """ return the ArrayNode corresponding to the given id"""
+    arrayNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Array'])
+    assignNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == '='])
+    for node in [node for node in assignNodes if len(set(node.children).intersection(arrayNodes))]:
+        if id == node.children[0].tok: 
+            return node
+
+def getFunction(id):
+    """ return a functioncallNode containing the function Node from the given id"""
+    from functools import reduce
+    functionNodes = [dicNode[key] for key in dicNode if dicNode[key].type == 'Function' and dicNode[key].children[0].tok==id]
+    if functionNodes:
+        return FunctionCallNode(functionNodes[0])
+    return None
+
+
+def verifyReturnNode():
+    """ verify if all return nodes are in programmes block from function nodes"""
+    returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
+    if returnNodes == None : return True
+    functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
+    functionProgrammsNodes = []
+    for functionNode in functionNodes:
+        functionProgrammsNodes.extend(functionNode.children[2].children)
+        
+    for returnNode in returnNodes:
+        if returnNode not in functionProgrammsNodes:
+            print("ERROR : return outside of a function")
+            return False
+    return True
+
+def verifyBreakContinueNode():
+    """ verify if all continue nodes are in loops and all break nodes are in structures"""
+    continueNodes = []
+    breakNodes = []
+    switchNodes = []
+    loopNodesToCheck = []   
+
+    for key in dicNode:                         #more efficient than 5 list comprehension, only one loop
+        if dicNode[key].type == 'Continue':
+            continueNodes.append(dicNode[key])
+        elif dicNode[key].type == 'Break':
+            breakNodes.append(dicNode[key])
+        elif dicNode[key].type == 'For':
+            loopNodesToCheck.extend(dicNode[key].children[3].children) #ProgramNode children of ForNode
+        elif dicNode[key].type == 'Switch':
+            switchNodes.append(dicNode[key])
+        elif dicNode[key].type == 'While':      # do while have the same program
+            loopNodesToCheck.extend(dicNode[key].children[1].children) #ProgramNode children of WhileNode
+
+    if continueNodes == None and breakNodes == None : return True
+    
+    for continueNode in continueNodes:
+        nodeVerified = False
+        for loopNode in loopNodesToCheck:
+            if checkInChildren(loopNode,continueNode):
+                nodeVerified = True
+        if not nodeVerified:
+            print("ERROR : Continue Node outside of a loop")
+            return False
+    
+    nodesToCheck = loopNodesToCheck+switchNodes
+
+    for breakNode in breakNodes:
+        nodeVerified = False
+        for nodeToCheck in nodesToCheck:
+            if checkInChildren(nodeToCheck,breakNode):
+                nodeVerified = True
+        if not nodeVerified:
+            print("ERROR : Break Node outside of a loop or switch")
+            return False
+
+    return True
+
+def checkInChildren(nodeToCheck,nodeSearched):
+    """check if a given node is in the nodeToCheck or its children"""
+    if nodeToCheck==nodeSearched:
+        return True
+    if nodeToCheck.children == None:
+        return False
+    for c in nodeToCheck.children:
+         if checkInChildren(c,nodeSearched):
+             return True
+    return False
+
+
+def verifyNode():
+    """verify if return, break and continue Nodes are well placed"""
+    return verifyReturnNode() and verifyBreakContinueNode()
