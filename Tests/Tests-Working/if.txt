@@ -21,5 +21,3 @@ else {
     log(4)
 }
 
-if(2<=9)
-    break

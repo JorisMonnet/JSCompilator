@@ -42,7 +42,7 @@ def p_program_recursive(p):
     | statement NEWLINE program '''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
 
-def p_newscope(p):
+def p_new_scope(p):
     '''new_scope : '''
     listScope.append(Scope())
     
@@ -63,6 +63,7 @@ def p_case_program(p):
 def p_program_statement(p):
     '''programStatement : assignation
     | structure
+    | structureIf
     | logStatement
     | breakStatement 
     | continueStatement 
@@ -106,12 +107,15 @@ def p_if(p):
 
 def p_else(p):
     '''structureElse : ELSE programStatement 
-    | ELSE structureIf
     | ELSE programBlock '''
     p[0] = AST.ElseNode([p[2]])
     
 def p_if_else(p):
     '''structure : structureIf structureElse '''
+    p[0] = AST.IfNode(p[1].children+[p[2]])
+
+def p_if_else_if(p):
+    '''structure : structureIf structureElse structureIf'''
     p[0] = AST.IfNode(p[1].children+[p[2]])
 
 def p_ternary_operator(p):
@@ -447,7 +451,7 @@ def p_return_values(p):
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
-    ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',','),
+    ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',',','IF',';'),
     ('nonassoc','LT','GT','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT', 'LTE','GTE'),
     ('left', 'ADD_OP'),
     ('left', 'MUL_OP'),
