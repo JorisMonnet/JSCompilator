@@ -1,0 +1,3 @@
+func1: 
+PUSHV a
+JINZ func1

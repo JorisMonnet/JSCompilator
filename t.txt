@@ -1,11 +1,6 @@
 
-function plusUn(data){
-    return(data+1)
+
+function test2 (a){
+    log(10)
 }
 
-var origin=10
-for(let i=0;i<10;i++){
-    let res=plusUn(origin)
-    log(res)
-    origin--
-}
