@@ -1,3 +1,5 @@
 func1: 
-PUSHV a
+PUSHC 10.0
+PRINT
+PUSHC 5.0
 JINZ func1

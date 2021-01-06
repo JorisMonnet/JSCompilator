@@ -98,7 +98,15 @@ def compile(self):
 	bytecode = ""
 	bytecode += "func%s: \n" % fcounter
 	bytecode += self.children[1].compile()
+	bytecode += self.children[2].compile()	
 	bytecode += "JINZ func%s\n" % fcounter
+	return bytecode
+
+#returnNode
+@addToClass(AST.ReturnNode)
+def compile(self):
+	bytecode=""
+	bytecode+=(self.children[0].compile())
 	return bytecode
 
 
@@ -106,7 +114,7 @@ def compile(self):
 @addToClass(AST.ArgNode)
 def compile(self):
 	bytecode = ""
-	if( isinstance(self.children[0].tok, str)):
+	if( isinstance(self.children[0].tok, str) and self.children[0].tok != "No Arguments"):
 		bytecode += "PUSHV %s\n" % self.children[0].tok
 	return bytecode
 

@@ -1,6 +1,7 @@
 
 
-function test2 (a){
+function test2 (){
     log(10)
+    return 5
 }
 
