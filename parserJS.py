@@ -92,7 +92,8 @@ def p_statement(p):
     | arrayDeclaration
     | functionDeclaration
     | functionCall
-    | returnStatement'''
+    | returnStatement
+    | varList'''
     p[0] = p[1]
 ####################################################################################################################
 
@@ -119,9 +120,10 @@ def p_ternary_operator(p):
 
 #FOR
 def p_for(p):
-    '''structure : FOR '(' assignation ';' condition ';' assignation ')' programBlock 
-    | FOR '(' assignation ';' condition ';' assignation ')' programStatement '''
-    p[0]=AST.ForNode([AST.startForNode(p[3]),p[5],AST.incForNode(p[7]),p[9]])
+    '''structure : FOR new_scope '(' assignation ';' condition ';' assignation ')' programBlock 
+    | FOR new_scope '(' assignation ';' condition ';' assignation ')' programStatement '''
+    p[0]=AST.ForNode([AST.startForNode(p[4]),p[6],AST.incForNode(p[8]),p[10]])
+    popscope()
 
 #WHILE
 def p_while(p):

@@ -1,4 +1,9 @@
+
 for(let a = 5;a<50;a++){
+    log(2)
+}
+for(let b = 5;b==200*9;b+=6)
+{
     log(2)
 }
 for(let b = 5;b==200*9;b+=6)

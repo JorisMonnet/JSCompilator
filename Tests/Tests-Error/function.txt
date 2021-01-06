@@ -1,0 +1,10 @@
+function a(b){
+    log(b)
+}
+function b(){
+    log(4)
+}
+a()
+let t,r
+a(t,r)
+b(r)
