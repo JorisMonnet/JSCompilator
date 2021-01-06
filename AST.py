@@ -298,13 +298,14 @@ def verifyBreakContinueNode():
         elif dicNode[key].type == 'Break':
             breakNodes.append(dicNode[key])
         elif dicNode[key].type == 'For':
-            loopNodesToCheck.extend(dicNode[key].children[3].children)
+            loopNodesToCheck.extend(dicNode[key].children[3].children) #ProgramNode children of ForNode
         elif dicNode[key].type == 'Switch':
             switchNodes.append(dicNode[key])
         elif dicNode[key].type == 'While':      # do while have the same program
-            loopNodesToCheck.extend(dicNode[key].children[1].children)
+            loopNodesToCheck.extend(dicNode[key].children[1].children) #ProgramNode children of WhileNode
 
     if continueNodes == None and breakNodes == None : return True
+    
     for continueNode in continueNodes:
         nodeVerified = False
         for loopNode in loopNodesToCheck:
@@ -328,6 +329,7 @@ def verifyBreakContinueNode():
     return True
 
 def checkInChildren(nodeToCheck,nodeSearched):
+    """check if a given node is in the nodeToCheck or its children"""
     if nodeToCheck==nodeSearched:
         return True
     if nodeToCheck.children == None:
@@ -339,4 +341,5 @@ def checkInChildren(nodeToCheck,nodeSearched):
 
 
 def verifyNode():
+    """verify if return, break and continue Nodes are well placed"""
     return verifyReturnNode() and verifyBreakContinueNode()

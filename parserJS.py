@@ -1,6 +1,7 @@
 import ply.yacc as yacc
 from lex import tokens
 import AST
+from copy import deepcopy
 
 ################################################### SCOPE ############################################################
 listScope = []
@@ -8,11 +9,11 @@ listScope = []
 class Scope():
     def __init__(self):
         if len(listScope) > 1:
-            self.vars = listScope[-1].vars
-            self.functionVars = listScope[-1].functionVars
+            self.vars = deepcopy(listScope[-1].vars)
+            self.functionVars = deepcopy(listScope[-1].functionVars)
         elif len(listScope) == 1:
-            self.vars = listScope[0].vars
-            self.functionVars = listScope[0].functionVars
+            self.vars = deepcopy(listScope[0].vars)
+            self.functionVars = deepcopy(listScope[0].functionVars)
         else :
             self.vars = []
             self.functionVars = []
@@ -63,7 +64,6 @@ def p_case_program(p):
 def p_program_statement(p):
     '''programStatement : assignation
     | structure
-    | structureIf
     | logStatement
     | breakStatement 
     | continueStatement 
@@ -107,15 +107,12 @@ def p_if(p):
 
 def p_else(p):
     '''structureElse : ELSE programStatement 
+    | ELSE structureIf
     | ELSE programBlock '''
     p[0] = AST.ElseNode([p[2]])
     
 def p_if_else(p):
     '''structure : structureIf structureElse '''
-    p[0] = AST.IfNode(p[1].children+[p[2]])
-
-def p_if_else_if(p):
-    '''structure : structureIf structureElse structureIf'''
     p[0] = AST.IfNode(p[1].children+[p[2]])
 
 def p_ternary_operator(p):
