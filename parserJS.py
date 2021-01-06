@@ -21,11 +21,16 @@ class Scope():
 
 def popscope():
     listScope.pop()
-    
+
+def p_new_scope(p):
+    '''new_scope : '''
+    listScope.append(Scope())
+
 listScope = [Scope()]
 listFunctions = []
 error = False
 
+start = '''program'''
 ####################################################################################################################
 
 ############################################ PROGRAMS ############################################################
@@ -43,10 +48,6 @@ def p_program_recursive(p):
     | statement NEWLINE program '''
     p[0] = AST.ProgramNode([p[1]]+p[3].children)
 
-def p_new_scope(p):
-    '''new_scope : '''
-    listScope.append(Scope())
-    
 def p_program_block(p):
     ''' programBlock : '{' new_scope program '}' '''
     p[0] = p[3]
