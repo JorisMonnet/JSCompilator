@@ -463,9 +463,10 @@ def p_error(p):
         print ("Sytax error: unexpected end of file!")
         
 def parse(program):
+    import re
     if program[-1]==';': #allow to finish with a ;
         program=program[:-1]
-    return yacc.parse(program+"\n")
+    return yacc.parse(re.sub(r";[(\n)(\s)(\t)]+}",r"\n}",program)+"\n")
 
 parser = yacc.yacc(outputdir='generated')
 
