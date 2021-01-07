@@ -90,7 +90,6 @@ def p_statement(p):
     | logStatement
     | breakStatement
     | continueStatement 
-    | arrayDeclaration
     | functionDeclaration
     | functionCall
     | returnStatement
@@ -221,8 +220,8 @@ def p_continue(p):
     p[0] = AST.ContinueNode()
 
 def p_log(p):
-    ''' logStatement : LOG expression '''
-    p[0] = AST.LogNode(p[2])
+    ''' logStatement : LOG '(' returnValues ')' '''
+    p[0] = AST.LogNode(p[3])
 
 ####################################################################################################################
 
