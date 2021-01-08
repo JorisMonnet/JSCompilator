@@ -63,19 +63,9 @@ def p_case_program(p):
     popscope()
 
 def p_program_statement(p):
-    '''programStatement : assignation
-    | structure
-    | logStatement
-    | breakStatement 
-    | continueStatement 
-    | functionCall
-    | returnStatement'''
+    '''programStatement : statement'''
     p[0] = AST.ProgramNode([p[1]])
 
-def p_newline_program_statement(p):
-    '''programStatement : NEWLINE programStatement'''
-    p[0] = p[2]
-    
 ####################################################################################################################
 
 ##################################################### STATEMENT ####################################################
@@ -100,18 +90,17 @@ def p_statement(p):
 ############################################### STRUCTURE ##########################################################
 #IF
 def p_if(p):
-    '''structureIf : IF '(' condition ')' programStatement
+    '''structureIf : IF '(' condition ')' programStatement NEWLINE
     | IF '(' condition ')' programBlock '''
     p[0] = AST.IfNode([p[3],p[5]])
 
 def p_else(p):
     '''structureElse : ELSE programStatement 
-    | ELSE structureIf
     | ELSE programBlock '''
     p[0] = AST.ElseNode([p[2]])
-    
+
 def p_if_else(p):
-    '''structure : structureIf structureElse '''
+    '''structure : structureIf structureElse'''
     p[0] = AST.IfNode(p[1].children+[p[2]])
 
 def p_ternary_operator(p):
@@ -447,11 +436,11 @@ def p_return_values(p):
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
-    ('left','ELSE','NEWLINE','AND','OR','IDENTIFIER', '!',',','IF',';'),
+    ('left','NEWLINE','ELSE','AND','OR','IDENTIFIER',',',';'),
     ('nonassoc','LT','GT','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT', 'LTE','GTE'),
     ('left', 'ADD_OP'),
     ('left', 'MUL_OP'),
-    ('right', 'UMINUS')
+    ('right', 'UMINUS','!')
 )
 
 def p_error(p):
