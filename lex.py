@@ -41,7 +41,7 @@ tokens = (
     'NEWLINE',
 ) + tuple(map(lambda s:s.upper(),reserved_words)) + conditions_symbols
 
-literals = '();={}?&|:!,[]'
+literals = '();={}?:!,[]'
 
 def t_ADD_OP(t):
     r'[+-]'

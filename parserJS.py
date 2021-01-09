@@ -436,8 +436,9 @@ def p_return_values(p):
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
-    ('left','NEWLINE','ELSE','AND','OR','IDENTIFIER',',',';'),
+    ('left','NEWLINE','ELSE','OR','IDENTIFIER',',',';'),
     ('nonassoc','LT','GT','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT', 'LTE','GTE'),
+    ('left','AND'),
     ('left', 'ADD_OP'),
     ('left', 'MUL_OP'),
     ('right', 'UMINUS','!')
