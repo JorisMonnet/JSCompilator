@@ -77,6 +77,7 @@ def p_statement(p):
     ''' statement : assignation
     | structure 
     | structureIf
+    | structureTernary
     | logStatement
     | breakStatement
     | continueStatement 
@@ -458,7 +459,7 @@ def parse(program):
         program=program[:-1]
     # to finish in a structure with a ; , we replace all the occurrences of ;\n} with \n variying 
     # but to keep the same number of line(for errors print), we replace by the same amount of \n
-    return yacc.parse(re.sub(r";[(\n)(\s)(\t)]+}",lambda x : "\n"*(len(x.group())-2)+"}",program)+"\n")
+    return yacc.parse(re.sub(r";(\n)+}",lambda x : "\n"*(len(x.group())-2)+"}",program)+"\n")
 
 parser = yacc.yacc(outputdir='generated')
 
