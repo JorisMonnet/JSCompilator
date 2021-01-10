@@ -180,10 +180,10 @@ class ElseNode(Node):
 class ForNode(Node):
     type = 'For'
 
-class startForNode(Node):
+class StartForNode(Node):
     type = 'Start'
 
-class incForNode(Node):
+class IncForNode(Node):
     type = 'Incrementer'
 
 class WhileNode(Node):

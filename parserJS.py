@@ -112,7 +112,7 @@ def p_ternary_operator(p):
 def p_for(p):
     '''structure : FOR new_scope '(' assignation ';' condition ';' assignation ')' programBlock 
     | FOR new_scope '(' assignation ';' condition ';' assignation ')' programStatement '''
-    p[0]=AST.ForNode([AST.startForNode(p[4]),p[6],AST.incForNode(p[8]),p[10]])
+    p[0]=AST.ForNode([AST.StartForNode(p[4]),p[6],AST.IncForNode(p[8]),p[10]])
     popscope()
 
 #WHILE
