@@ -1,2 +1,2 @@
 # JSCompilator
-Compilator of javascript made in python. Course of compilator at HE-Arc
+javascript compiler made in python. Course of compiler at HE-Arc
