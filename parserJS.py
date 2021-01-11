@@ -160,9 +160,12 @@ def p_case_list(p) :
     p[0] = [p[1]]
 
 def p_default(p):
-    '''defaultStructure : DEFAULT caseProgram '''
-    print(2)
+    '''caseStructure : DEFAULT caseProgram '''
     p[0] = AST.DefaultNode([p[2]])
+
+def p_case_list_recursive_newline(p):
+    '''caseList : caseList NEWLINE caseStructure '''
+    p[0] = p[1]+[p[3]]
 
 def p_case_list_recursive(p):
     '''caseList : caseList caseStructure '''
@@ -463,12 +466,8 @@ def p_error(p):
         print ("Sytax error: unexpected end of file!")
         
 def parse(program):
-    import re
-    if program[-1]==';': #allow to finish with a ;
-        program=program[:-1]
-    # to finish in a structure with a ; , we replace all the occurrences of ;\n} with \n variying 
-    # but to keep the same number of line(for errors print), we replace by the same amount of \n
-    return yacc.parse(re.sub(r";(\n)+}",lambda x : "\n"*(len(x.group())-2)+"}",program)+"\n")
+    # to finish in a structure with a ; , we replace all the occurrences of ;\n with \n  
+    return yacc.parse(program.replace(";\n","\n")+"\n")
 
 parser = yacc.yacc(outputdir='generated')
 
