@@ -133,8 +133,16 @@ def p_do_while_without_bracket(p):
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseList '}' '''
     if p[3] in listScope[-1 if len(listScope)>1 else 0].vars:
-        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3])]+p[7])
         popscope()
+    else :
+        error = True
+        print(f"ERROR :{p[3]} is not declared")
+
+def p_switch_void(p):
+    ''' structure : SWITCH '(' IDENTIFIER ')' '{' '}' '''
+    if p[3] in listScope[-1 if len(listScope)>1 else 0].vars:
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),AST.TokenNode('Empty switch')])
     else :
         error = True
         print(f"ERROR :{p[3]} is not declared")
@@ -149,16 +157,16 @@ def p_case(p):
 
 def p_case_list(p) :
     '''caseList : caseStructure '''
-    p[0] = AST.CaseListNode([p[1]])
+    p[0] = [p[1]]
 
 def p_default(p):
     '''defaultStructure : DEFAULT caseProgram '''
+    print(2)
     p[0] = AST.DefaultNode([p[2]])
 
 def p_case_list_recursive(p):
-    '''caseList : caseList caseStructure
-    | caseList defaultStructure '''
-    p[0] = AST.CaseListNode(p[1].children+[p[2]])
+    '''caseList : caseList caseStructure '''
+    p[0] = p[1]+[p[2]]
 
 ####################################################################################################################
 
