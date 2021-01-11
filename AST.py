@@ -275,12 +275,12 @@ def verifyReturnNode():
     returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
     if returnNodes == None : return True
     functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
-    functionProgrammsNodes = []
+    functionProgramsNodes = []
     for functionNode in functionNodes:
-        functionProgrammsNodes.extend(functionNode.children[2].children)
+        functionProgramsNodes.extend(functionNode.children[2].children)
         
     for returnNode in returnNodes:
-        if returnNode not in functionProgrammsNodes:
+        if returnNode not in functionProgramsNodes:
             print("ERROR : return outside of a function")
             return False
     return True

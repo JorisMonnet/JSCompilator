@@ -260,17 +260,21 @@ def p_token_list_recursive(p):
 
 def p_array_access(p):
     ''' expression : IDENTIFIER '[' NUMBER ']' '''
-    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars and int(p[3])==p[3]:
-        node = AST.getArrayNodeById(p[1])
-        if node :
-            if len(node.children[1].children) > int(p[3]):
-                p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
-            else: 
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars :
+        if int(p[3])==p[3] :
+            node = AST.getArrayNodeById(p[1])
+            if node :
+                if len(node.children[1].children) > int(p[3]):
+                    p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
+                else: 
+                    error = True
+                    print(f"ERROR : index out of bounds")
+            else : 
                 error = True
-                print(f"ERROR : index out of bounds")
+                print(f"ERROR : {p[1]} is not declared as array")
         else : 
             error = True
-            print(f"ERROR : {p[1]} is not declared as array")
+            print(f"ERROR : {p[1]} must be accessed with a integer number")
     else : 
         error = True
         print(f"ERROR : {p[1]} is not declared")
