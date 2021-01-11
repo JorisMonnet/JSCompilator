@@ -466,6 +466,8 @@ def p_error(p):
         print ("Sytax error: unexpected end of file!")
         
 def parse(program):
+    import re
+    program = re.sub(r";+",";",program) # allow multiple ; as in javascript
     # to finish in a structure with a ; , we replace all the occurrences of ;\n with \n  
     return yacc.parse(program.replace(";\n","\n")+"\n")
 
