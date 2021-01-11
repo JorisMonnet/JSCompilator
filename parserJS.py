@@ -149,7 +149,7 @@ def p_case(p):
 
 def p_case_list(p) :
     '''caseList : caseStructure '''
-    p[0] = p[1]
+    p[0] = AST.CaseListNode([p[1]])
 
 def p_default(p):
     '''defaultStructure : DEFAULT caseProgram '''
@@ -158,10 +158,7 @@ def p_default(p):
 def p_case_list_recursive(p):
     '''caseList : caseList caseStructure
     | caseList defaultStructure '''
-    if p[1].type !='case':
-        p[0] = AST.CaseListNode(p[1].children+[p[2]])
-    else :
-        p[0] = AST.CaseListNode([p[1],p[2]])
+    p[0] = AST.CaseListNode(p[1].children+[p[2]])
 
 ####################################################################################################################
 
