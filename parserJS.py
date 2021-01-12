@@ -77,6 +77,7 @@ def p_statement(p):
     ''' statement : assignation
     | structure 
     | structureIf
+    | structureTernary
     | logStatement
     | breakStatement
     | continueStatement 
@@ -111,7 +112,7 @@ def p_ternary_operator(p):
 def p_for(p):
     '''structure : FOR new_scope '(' assignation ';' condition ';' assignation ')' programBlock 
     | FOR new_scope '(' assignation ';' condition ';' assignation ')' programStatement '''
-    p[0]=AST.ForNode([AST.startForNode(p[4]),p[6],AST.incForNode(p[8]),p[10]])
+    p[0]=AST.ForNode([AST.StartForNode(p[4]),p[6],AST.IncForNode(p[8]),p[10]])
     popscope()
 
 #WHILE
@@ -132,8 +133,16 @@ def p_do_while_without_bracket(p):
 def p_switch(p):
     '''structure : SWITCH '(' IDENTIFIER ')' '{' new_scope caseList '}' '''
     if p[3] in listScope[-1 if len(listScope)>1 else 0].vars:
-        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),p[7]])
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3])]+p[7])
         popscope()
+    else :
+        error = True
+        print(f"ERROR :{p[3]} is not declared")
+
+def p_switch_void(p):
+    ''' structure : SWITCH '(' IDENTIFIER ')' '{' '}' '''
+    if p[3] in listScope[-1 if len(listScope)>1 else 0].vars:
+        p[0] = AST.SwitchNode([AST.TokenNode(p[3]),AST.TokenNode('Empty switch')])
     else :
         error = True
         print(f"ERROR :{p[3]} is not declared")
@@ -148,19 +157,19 @@ def p_case(p):
 
 def p_case_list(p) :
     '''caseList : caseStructure '''
-    p[0] = p[1]
+    p[0] = [p[1]]
 
 def p_default(p):
-    '''defaultStructure : DEFAULT caseProgram '''
+    '''caseStructure : DEFAULT caseProgram '''
     p[0] = AST.DefaultNode([p[2]])
 
+def p_case_list_recursive_newline(p):
+    '''caseList : caseList NEWLINE caseStructure '''
+    p[0] = p[1]+[p[3]]
+
 def p_case_list_recursive(p):
-    '''caseList : caseList caseStructure
-    | caseList defaultStructure '''
-    if p[1].type !='case':
-        p[0] = AST.CaseListNode(p[1].children+[p[2]])
-    else :
-        p[0] = AST.CaseListNode([p[1],p[2]])
+    '''caseList : caseList caseStructure '''
+    p[0] = p[1]+[p[2]]
 
 ####################################################################################################################
 
@@ -259,17 +268,21 @@ def p_token_list_recursive(p):
 
 def p_array_access(p):
     ''' expression : IDENTIFIER '[' NUMBER ']' '''
-    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars and int(p[3])==p[3]:
-        node = AST.getArrayNodeById(p[1])
-        if node :
-            if len(node.children[1].children) > int(p[3]):
-                p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
-            else: 
+    if p[1] in listScope[-1 if len(listScope)>1 else 0].vars :
+        if int(p[3])==p[3] :
+            node = AST.getArrayNodeById(p[1])
+            if node :
+                if len(node.children[1].children) > int(p[3]):
+                    p[0] = AST.TokenNode(p[1]+'['+str(int(p[3]))+']'+'('+node.children[1].children[int(p[3])].tok+')')
+                else: 
+                    error = True
+                    print(f"ERROR : index out of bounds")
+            else : 
                 error = True
-                print(f"ERROR : index out of bounds")
+                print(f"ERROR : {p[1]} is not declared as array")
         else : 
             error = True
-            print(f"ERROR : {p[1]} is not declared as array")
+            print(f"ERROR : {p[1]} must be accessed with a integer number")
     else : 
         error = True
         print(f"ERROR : {p[1]} is not declared")
@@ -436,8 +449,9 @@ def p_return_values(p):
 
 #http://www.dabeaz.com/ply/ply.html#ply_nn27
 precedence = (
-    ('left','NEWLINE','ELSE','AND','OR','IDENTIFIER',',',';'),
+    ('left','NEWLINE','ELSE','OR','IDENTIFIER',',',';'),
     ('nonassoc','LT','GT','EQUALV','EQUALVT','NOTEQUALV','NOTEQUALVT', 'LTE','GTE'),
+    ('left','AND'),
     ('left', 'ADD_OP'),
     ('left', 'MUL_OP'),
     ('right', 'UMINUS','!')
@@ -453,11 +467,9 @@ def p_error(p):
         
 def parse(program):
     import re
-    if program[-1]==';': #allow to finish with a ;
-        program=program[:-1]
-    # to finish in a structure with a ; , we replace all the occurrences of ;\n} with \n variying 
-    # but to keep the same number of line(for errors print), we replace by the same amount of \n
-    return yacc.parse(re.sub(r";[(\n)(\s)(\t)]+}",lambda x : "\n"*(len(x.group())-2)+"}",program)+"\n")
+    program = re.sub(r";+",";",program) # allow multiple ; as in javascript
+    # to finish in a structure with a ; , we replace all the occurrences of ;\n with \n  
+    return yacc.parse(program.replace(";\n","\n")+"\n")
 
 parser = yacc.yacc(outputdir='generated')
 

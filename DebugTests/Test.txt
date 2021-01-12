@@ -1,29 +1,9 @@
-if(2<5){
-    log(2)
-} else if (1==5){
-    log(3)
-} else {
-    log(4)
-}
-
-if(2<5) log(2) 
-else if (1==5) log(3)
-else  log(4)
-
-if(2<5){
-    log(2)
-} else if (1==5)
-    log(3)
-else {
-    log(4)
-}
-
-if(! 5<2){
+if(2<6)
     log(5)
-}
+else
+    log(4)
+if(2<9)
+    log(6);
 
-for(let i =0;i<4;i+=5)
-    if(i<5)
-        log(2)
-    else    
-        log(4)
+if(5<89)
+    log(41)
