@@ -179,10 +179,10 @@ class ElseNode(Node):
 class ForNode(Node):
     type = 'For'
 
-class startForNode(Node):
+class StartForNode(Node):
     type = 'Start'
 
-class incForNode(Node):
+class IncForNode(Node):
     type = 'Incrementer'
 
 class WhileNode(Node):
@@ -193,6 +193,8 @@ class DoNode(Node):
 
 class SwitchNode(Node):
     type = 'Switch'
+    def verifyDefault(self):
+        return len([child for child in self.children if child.type == 'Default']) < 2 # allow 0 or 1 defaultNode per switchNode
 
 class CaseNode(Node):
     type = 'Case'
@@ -274,12 +276,12 @@ def verifyReturnNode():
     returnNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Return'])
     if returnNodes == None : return True
     functionNodes = set([dicNode[key] for key in dicNode if dicNode[key].type == 'Function'])
-    functionProgrammsNodes = []
+    functionProgramsNodes = []
     for functionNode in functionNodes:
-        functionProgrammsNodes.extend(functionNode.children[2].children)
+        functionProgramsNodes.extend(functionNode.children[2].children)
         
     for returnNode in returnNodes:
-        if returnNode not in functionProgrammsNodes:
+        if returnNode not in functionProgramsNodes:
             print("ERROR : return outside of a function")
             return False
     return True
@@ -338,7 +340,14 @@ def checkInChildren(nodeToCheck,nodeSearched):
              return True
     return False
 
+def verifyDefault():
+    """verify if all switch nodes have only 0 or 1 default node in their children"""
+    for node in  set([dicNode[key] for key in dicNode if dicNode[key].type == 'Switch']):
+        if not node.verifyDefault():
+            print("ERROR : two default in the same switch")
+            return False
+    return True
 
 def verifyNode():
-    """verify if return, break and continue Nodes are well placed"""
-    return verifyReturnNode() and verifyBreakContinueNode()
+    """verify if return, break, continue and Default Nodes are well placed"""
+    return verifyReturnNode() and verifyBreakContinueNode() and verifyDefault()
