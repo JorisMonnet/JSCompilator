@@ -1,12 +1,10 @@
 PUSHC 1.0
 SET a
 JMP cond1
-while1: PUSHC 41.0
+body1: PUSHC 41.0
 PRINT
 PUSHV a
 PUSHC 2.0
 MUL
 SET a
-cond1: JINZ while1
-cond2: PUSHC 81.0
-PRINT
+cond1: cond1: JINZ body1

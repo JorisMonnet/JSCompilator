@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+
+""" ParserJS : syntaxical and semantical analysis with Ply.yacc
+authors: Adrien Paysant & Joris Monnet
+Date : 2021
+"""
 import ply.yacc as yacc
 from lex import tokens
 import AST
@@ -7,6 +13,7 @@ from copy import deepcopy
 listScope = []
 
 class Scope():
+    """class managing the scopes of the variables and function name"""
     def __init__(self):
         if len(listScope) > 1:
             self.vars = deepcopy(listScope[-1].vars)
@@ -20,6 +27,7 @@ class Scope():
         self.argVars = []
 
 def popscope():
+    """go in the parent scope"""
     listScope.pop()
 
 def p_new_scope(p):
@@ -466,25 +474,29 @@ def p_error(p):
         print ("Sytax error: unexpected end of file!")
         
 def parse(program):
+    """parse the specified program"""
     import re
     program = re.sub(r";+",";",program) # allow multiple ; as in javascript
     # to finish in a structure with a ; , we replace all the occurrences of ;\n with \n  
-    return yacc.parse(program.replace(";\n","\n")+"\n")
+    result = yacc.parse(program.replace(";\n","\n")+"\n")
+    if result and not error : 
+        AST.recreateVariableNode()
+        isVerified = AST.verifyNode()
+        return result,isVerified
+    print ("Parsing Error")
+    return None,False
 
 parser = yacc.yacc(outputdir='generated')
 
 if __name__ == "__main__":
     import sys
     prog = open(sys.argv[1]).read()
-    result = parse(prog) 
-    if result and not error:
-        AST.recreateVariableNode()
-        if AST.verifyNode():
-            print (result)
-            graph = result.makegraphicaltree()
-            import os
-            name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
-            graph.write_pdf(name)
-            print ("wrote ast to", name)
-    else:
-        print ("Parsing Error")
+    result, isVerified = parse(prog) 
+    if isVerified:
+        print (result)
+        graph = result.makegraphicaltree()
+        import os
+        name = os.path.splitext(sys.argv[1])[0]+'-ast.pdf'
+        graph.write_pdf(name)
+        print ("wrote ast to", name)
+        

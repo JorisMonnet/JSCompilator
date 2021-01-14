@@ -8,18 +8,22 @@ operations = {
 	'/' : 'DIV'
 }
 
+dicConditions = {
+	'<' 	: lambda x,y : int(x < y),
+	'>' 	: lambda x,y : int(x > y),
+	'<=' 	: lambda x,y : int(x <= y),
+	'>=' 	: lambda x,y : int(x >= y),
+	'===' 	: lambda x,y : int(x == y and type(y)==type(x)),
+	'!==' 	: lambda x,y : int(x != y or type(y)!=type(x)),
+	'==' 	: lambda x,y : int(x == y),
+	'!=' 	: lambda x,y : int(x != y)
+}
+
 def condcounter():
 	condcounter.current += 1
 	return condcounter.current
 
 condcounter.current = 0
-
-
-def whilecounter():
-	whilecounter.current += 1
-	return whilecounter.current
-
-whilecounter.current = 0
 
 def functioncounter():
 	functioncounter.current += 1
@@ -27,9 +31,7 @@ def functioncounter():
 
 functioncounter.current = 0
 
-
-
-#programme
+#program
 @addToClass(AST.ProgramNode)
 def compile(self):
 	bytecode = ""
@@ -77,52 +79,28 @@ def compile(self):
 	
 #conditionNode
 @addToClass(AST.ConditionNode)
-def compile(self,ccounter):
+def compile(self):
 	bytecode = ""
-	bytecode += "cond%s: " % ccounter
-	leftMember=self.children[0].tok
-	rightMember=self.children[2].tok
-	opMember=self.children[1].tok
-	tempStock=2
-
-	# if opMember=="<":
-	# 	if leftMember < rightMember :
-	# elif opMember=="<=":
-
-	# elif opMember==">":
-
-	# elif opMember==">=":
-
-	# elif opMember=="===":
-
-	# elif opMember=="!==":
-
-	# elif opMember=="==":
-
-	# elif opMember=="!=":
-	
-	
-
+	bytecode += "cond%s: " % dicConditions[self.children[1].tok](self.children[0].compile,self.children[2].compile)
 	return bytecode
 
 #while
 @addToClass(AST.WhileNode)
 def compile(self):
-	wcounter = whilecounter()
-	ccounter = condcounter()
+	counter = condcounter() 
 	bytecode = ""
-	bytecode += "JMP cond%s\n" % ccounter
-	bytecode += "while%s: " % wcounter
-	bytecode += self.children[1].compile()
-	bytecode+= self.children[0].compile(ccounter)
-	bytecode += "JINZ while%s\n" % wcounter
+	bytecode += "JMP cond%s\n" % counter 
+	bytecode += "body%s: " % counter 
+	bytecode += self.children[1].compile() 
+	bytecode += "cond%s: " % counter
+	bytecode += self.children[0].compile() 
+	bytecode += "JINZ body%s\n" % counter 
 	return bytecode
-	
 
 #functionNode
 @addToClass(AST.FunctionNode)
 def compile(self):
-	fcounter=functioncounter()
+	fcounter = functioncounter()
 	bytecode = ""
 	bytecode += "func%s: \n" % fcounter
 	bytecode += self.children[1].compile()
@@ -137,7 +115,6 @@ def compile(self):
 	bytecode+=(self.children[0].compile())
 	return bytecode
 
-
 #argNode
 @addToClass(AST.ArgNode)
 def compile(self):
@@ -146,7 +123,7 @@ def compile(self):
 		bytecode += "PUSHV %s\n" % self.children[0].tok
 	return bytecode
 
-
+"""
 #ifNode
 @addToClass(AST.IfNode)
 def compile(self):
@@ -154,15 +131,17 @@ def compile(self):
 	bytecode += self.children[0].compile(condcounter())
 	bytecode += self.children[1].compile()
 	return bytecode
-
+"""
 if __name__ == "__main__":
 	from parserJS import parse
-	import sys,os
+	import sys
 	prog = open(sys.argv[1]).read()
-	ast = parse(prog)
-	compiled = ast.compile()
-	name = os.path.splitext(sys.argv[1])[0]+'.vm'
-	outfile = open(name,'w')
-	outfile.write(compiled)
-	outfile.close()
-	print("Wrote output to",name)
+	ast, isVerified = parse(prog)
+	if isVerified:
+		compiled = ast.compile()
+		import os
+		name = os.path.splitext(sys.argv[1])[0]+'.vm'
+		outfile = open(name,'w')
+		outfile.write(compiled)
+		outfile.close()
+		print("Wrote output to",name)

@@ -2,12 +2,7 @@
 
 var a=1
 
-while(a<=6){
+while(2<=6){
     log(41)
     a*=2
-}
-
-
-if(a<6){
-    log(81)
 }

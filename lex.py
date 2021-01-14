@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+
+""" Lexer : it uses ply.lex to make our lexical anlysis
+authors: Adrien Paysant & Joris Monnet
+Date : 2021
+"""
+
 import ply.lex as lex
 
 reserved_words = (
@@ -43,14 +50,17 @@ tokens = (
 
 literals = '();={}?:!,[]'
 
+# + and -
 def t_ADD_OP(t):
     r'[+-]'
     return t
 
+# * and /
 def t_MUL_OP(t):
     r'[*/]'
     return t
 
+#Numbers are floats
 def t_NUMBER(t):
     r'\d+(\.\d+)?'
     try:
@@ -60,12 +70,14 @@ def t_NUMBER(t):
         t.value = 0
     return t
 
+#identifier used for variables
 def t_IDENTIFIER(t):
     r'[A-Za-z_]\w*'
     if t.value in reserved_words:
         t.type = t.value.upper()
     return t
 
+#new lines are used in JavaScript as ;
 def t_NEWLINE(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
