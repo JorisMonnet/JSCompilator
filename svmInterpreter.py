@@ -8,17 +8,6 @@ operations = {
 	'/' : 'DIV'
 }
 
-dicConditions = {
-	'<' 	: lambda x,y : int(x < y),
-	'>' 	: lambda x,y : int(x > y),
-	'<=' 	: lambda x,y : int(x <= y),
-	'>=' 	: lambda x,y : int(x >= y),
-	'===' 	: lambda x,y : int(x == y and type(y)==type(x)),
-	'!==' 	: lambda x,y : int(x != y or type(y)!=type(x)),
-	'==' 	: lambda x,y : int(x == y),
-	'!=' 	: lambda x,y : int(x != y)
-}
-
 def condcounter():
 	condcounter.current += 1
 	return condcounter.current
@@ -48,23 +37,41 @@ def compile(self):
 	else:
 		bytecode += "PUSHC %s\n" % self.tok
 	return bytecode
+####################################################################################################################
 
-@addToClass(AST.AssignNode)
+###################################################### FUNCTION ####################################################
+@addToClass(AST.FunctionNode)
 def compile(self):
+	fcounter = functioncounter()
 	bytecode = ""
+	bytecode += "func%s: \n" % fcounter
 	bytecode += self.children[1].compile()
-	bytecode += "SET %s\n" % self.children[0].tok
+	bytecode += self.children[2].compile()	
+	bytecode += "JINZ func%s\n" % fcounter
 	return bytecode
-	
-#print
-@addToClass(AST.LogNode)
+
+@addToClass(AST.ReturnNode)
+def compile(self):
+	bytecode=""
+	bytecode+=(self.children[0].compile())
+	return bytecode
+
+@addToClass(AST.ArgNode)
 def compile(self):
 	bytecode = ""
-	bytecode += self.children[0].compile()
-	bytecode += "PRINT\n"
+	if( isinstance(self.children[0].tok, str) and self.children[0].tok != "No Arguments"):
+		bytecode += "PUSHV %s\n" % self.children[0].tok
 	return bytecode
-	 
-#operation
+
+@addToClass(AST.FunctionCallNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+####################################################################################################################
+
+################################################# OPERATIONS #######################################################
+
 @addToClass(AST.OpNode)
 def compile(self):
 	bytecode = ""
@@ -76,15 +83,55 @@ def compile(self):
 			bytecode += c.compile()
 		bytecode += operations[self.op] + "\n"
 	return bytecode
-	
-#conditionNode
-@addToClass(AST.ConditionNode)
+
+@addToClass(AST.AssignNode)
 def compile(self):
 	bytecode = ""
-	bytecode += "cond%s: " % dicConditions[self.children[1].tok](self.children[0].compile,self.children[2].compile)
+	bytecode += self.children[1].compile()
+	bytecode += "SET %s\n" % self.children[0].tok
 	return bytecode
 
-#while
+@addToClass(AST.VariableNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.ArrayNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+####################################################################################################################
+
+################################################# STRUCTURE ########################################################
+
+@addToClass(AST.IfNode)
+def compile(self):
+	bytecode = ""
+	bytecode += self.children[0].compile(condcounter())
+	bytecode += self.children[1].compile()
+	return bytecode
+
+@addToClass(AST.ElseNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.ForNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.StartForNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.IncForNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
 @addToClass(AST.WhileNode)
 def compile(self):
 	counter = condcounter() 
@@ -97,41 +144,92 @@ def compile(self):
 	bytecode += "JINZ body%s\n" % counter 
 	return bytecode
 
-#functionNode
-@addToClass(AST.FunctionNode)
-def compile(self):
-	fcounter = functioncounter()
-	bytecode = ""
-	bytecode += "func%s: \n" % fcounter
-	bytecode += self.children[1].compile()
-	bytecode += self.children[2].compile()	
-	bytecode += "JINZ func%s\n" % fcounter
-	return bytecode
-
-#returnNode
-@addToClass(AST.ReturnNode)
-def compile(self):
-	bytecode=""
-	bytecode+=(self.children[0].compile())
-	return bytecode
-
-#argNode
-@addToClass(AST.ArgNode)
+@addToClass(AST.DoNode)
 def compile(self):
 	bytecode = ""
-	if( isinstance(self.children[0].tok, str) and self.children[0].tok != "No Arguments"):
-		bytecode += "PUSHV %s\n" % self.children[0].tok
 	return bytecode
 
-"""
-#ifNode
-@addToClass(AST.IfNode)
+@addToClass(AST.SwitchNode)
 def compile(self):
 	bytecode = ""
-	bytecode += self.children[0].compile(condcounter())
-	bytecode += self.children[1].compile()
 	return bytecode
-"""
+
+@addToClass(AST.CaseNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.CaseListNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.DefaultNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+####################################################################################################################
+
+################################################# STATEMENT ########################################################
+
+@addToClass(AST.LogNode)
+def compile(self):
+	bytecode = ""
+	bytecode += self.children[0].compile()
+	bytecode += "PRINT\n"
+	return bytecode
+
+@addToClass(AST.BreakNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.ContinueNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+####################################################################################################################
+
+############################################ CONDITIONS ############################################################
+
+dicConditions = {
+	'<' 	: lambda x,y : int(x < y),
+	'>' 	: lambda x,y : int(x > y),
+	'<=' 	: lambda x,y : int(x <= y),
+	'>=' 	: lambda x,y : int(x >= y),
+	'===' 	: lambda x,y : int(x == y and type(y)==type(x)),
+	'!==' 	: lambda x,y : int(x != y or type(y)!=type(x)),
+	'==' 	: lambda x,y : int(x == y),
+	'!=' 	: lambda x,y : int(x != y)
+}
+
+@addToClass(AST.ConditionNode)
+def compile(self):
+	bytecode = ""
+	bytecode += "cond%s: " % dicConditions[self.children[1].tok](self.children[0].compile,self.children[2].compile)
+	return bytecode
+
+@addToClass(AST.AndNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.OrNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+@addToClass(AST.NotNode)
+def compile(self):
+	bytecode = ""
+	return bytecode
+
+####################################################################################################################
+
+####################################################################################################################
+
 if __name__ == "__main__":
 	from parserJS import parse
 	import sys
