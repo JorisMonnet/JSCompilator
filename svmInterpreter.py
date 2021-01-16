@@ -37,9 +37,11 @@ def compile(self):
 	else:
 		bytecode += "PUSHC %s\n" % self.tok
 	return bytecode
+
 ####################################################################################################################
 
 ###################################################### FUNCTION ####################################################
+
 @addToClass(AST.FunctionNode)
 def compile(self):
 	fcounter = functioncounter()
@@ -99,6 +101,7 @@ def compile(self):
 @addToClass(AST.ArrayNode)
 def compile(self):
 	bytecode = ""
+	bytecode += "PUSHV %s\n" % self.children[0].compile
 	return bytecode
 
 ####################################################################################################################
@@ -107,8 +110,9 @@ def compile(self):
 
 @addToClass(AST.IfNode)
 def compile(self):
-	bytecode = ""
-	bytecode += self.children[0].compile(condcounter())
+	counter = condcounter()
+	bytecode = "cond%s: " % counter
+	bytecode += self.children[0].compile()
 	bytecode += self.children[1].compile()
 	return bytecode
 
@@ -207,9 +211,7 @@ dicConditions = {
 
 @addToClass(AST.ConditionNode)
 def compile(self):
-	bytecode = ""
-	bytecode += "cond%s: " % dicConditions[self.children[1].tok](self.children[0].compile,self.children[2].compile)
-	return bytecode
+	return "PUSHC " + str(dicConditions[self.children[1].tok](self.children[0].tok,self.children[2].tok))+"\n"
 
 @addToClass(AST.AndNode)
 def compile(self):

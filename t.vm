@@ -7,4 +7,5 @@ PUSHV a
 PUSHC 2.0
 MUL
 SET a
-cond1: cond1: JINZ body1
+cond1: PUSHC 1
+JINZ body1
