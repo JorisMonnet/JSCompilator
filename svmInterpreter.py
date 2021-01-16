@@ -155,6 +155,7 @@ def compile(self):
 
 @addToClass(AST.SwitchNode)
 def compile(self):
+	if len(self.children)==2 and self.children[1].type=='Token':return "" #void switch
 	for children in self.children[1:]:
 		if children.type !='Default' and children.children[0] == self.children[0]:
 			return children.compile()
