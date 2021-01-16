@@ -108,39 +108,41 @@ def compile(self):
 
 ################################################# STRUCTURE ########################################################
 
+
 @addToClass(AST.IfNode)
 def compile(self):
-	counter = condcounter()
-	bytecode = "\nbody%s: " % counter 
-	bytecode += self.children[1].compile() 
-	bytecode += "cond%s: " % counter
-	bytecode += self.children[0].compile()
-	return bytecode
+	if int(self.children[0].compile()[-2]):
+		ifIsTrue = True
+		return self.children[1].compile()
+	if len(self.children) > 2 :
+		return self.children[2].compile()
 
 @addToClass(AST.ElseNode)
 def compile(self):
-	return self.children[0].compile
+	print("else")
+	return  self.children[0].compile()
 
 @addToClass(AST.ForNode)
 def compile(self):
 	bytecode = ""
+	bytecode += self.children[0].compile
+	bytecode += self.children[1].compile
+	bytecode += self.children[2].compile
+	bytecode += self.children[3].compile
 	return bytecode
 
 @addToClass(AST.StartForNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return self.children[0].copmpile()
 
 @addToClass(AST.IncForNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return self.children[0].copmpile()
 
 @addToClass(AST.WhileNode)
 def compile(self):
 	counter = condcounter() 
-	bytecode = ""
-	bytecode += "JMP cond%s\n" % counter 
+	bytecode = "JMP cond%s\n" % counter 
 	bytecode += "body%s: " % counter 
 	bytecode += self.children[1].compile() 
 	bytecode += "cond%s: " % counter
@@ -150,8 +152,7 @@ def compile(self):
 
 @addToClass(AST.DoNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return self.children[0].copmpile() + self.children[1].copmpile()
 
 @addToClass(AST.SwitchNode)
 def compile(self):
@@ -211,25 +212,23 @@ dicConditions = {
 
 @addToClass(AST.ConditionNode)
 def compile(self):
-	print(f"{int(self.children[0].tok)}\n{int(self.children[2].tok)}")
 	return "PUSHC " + str(dicConditions[self.children[1].tok](int(self.children[0].tok),int(self.children[2].tok)))+"\n"
 
 @addToClass(AST.AndNode)
 def compile(self):
-	children1Code = self.children[0].compile()[-2] #get 0 or 1
-	children2Code = self.children[1].compile()[-2]
+	children1Code = int(self.children[0].compile()[-2]) #get 0 or 1
+	children2Code = int(self.children[1].compile()[-2])
 	return "PUSHC " + str(int(children1Code and children2Code)) + "\n"
 
 @addToClass(AST.OrNode)
 def compile(self):
-	children1Code = self.children[0].compile()[-2]
-	children2Code = self.children[1].compile()[-2]
+	children1Code = int(self.children[0].compile()[-2])
+	children2Code = int(self.children[1].compile()[-2])
 	return "PUSHC " + str(int(children1Code or children2Code)) + "\n"
 
 @addToClass(AST.NotNode)
 def compile(self):
-	childrenCode = self.children[0].compile()[-2] 
-	return "PUSHC " + str(int(not childrenCode))+"\n"
+	return "PUSHC " + str(int(not int(self.children[0].compile()[-2]) ))+"\n"
 
 ####################################################################################################################
 
