@@ -119,7 +119,6 @@ def compile(self):
 
 @addToClass(AST.ElseNode)
 def compile(self):
-	print("else")
 	return  self.children[0].compile()
 
 @addToClass(AST.ForNode)
@@ -133,11 +132,11 @@ def compile(self):
 
 @addToClass(AST.StartForNode)
 def compile(self):
-	return self.children[0].copmpile()
+	return self.children[0].compile()
 
 @addToClass(AST.IncForNode)
 def compile(self):
-	return self.children[0].copmpile()
+	return self.children[0].compile()
 
 @addToClass(AST.WhileNode)
 def compile(self):
@@ -152,7 +151,7 @@ def compile(self):
 
 @addToClass(AST.DoNode)
 def compile(self):
-	return self.children[0].copmpile() + self.children[1].copmpile()
+	return self.children[0].compile() + self.children[1].compile()
 
 @addToClass(AST.SwitchNode)
 def compile(self):
@@ -161,18 +160,11 @@ def compile(self):
 
 @addToClass(AST.CaseNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
-
-@addToClass(AST.CaseListNode)
-def compile(self):
-	bytecode = ""
-	return bytecode
+	return self.children[1].compile()
 
 @addToClass(AST.DefaultNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return self.children[0].compile()
 
 ####################################################################################################################
 

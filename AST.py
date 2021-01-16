@@ -198,9 +198,6 @@ class SwitchNode(Node):
 
 class CaseNode(Node):
     type = 'Case'
-
-class CaseListNode(Node):
-    type = 'CaseList'
     
 class DefaultNode(Node):
     type = 'Default'
