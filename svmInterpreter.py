@@ -155,8 +155,13 @@ def compile(self):
 
 @addToClass(AST.SwitchNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	for children in self.children[1:]:
+		if children.type !='Default' and children.children[0] == self.children[0]:
+			return children.compile()
+	for children in self.children[1:]:
+		if children.type =='Default':
+			return children.compile()
+	return ""
 
 @addToClass(AST.CaseNode)
 def compile(self):
