@@ -61,12 +61,6 @@ dicConditions = {
 	'==' 	: lambda x,y : int(x == y),
 	'!=' 	: lambda x,y : int(x != y)
 }
-def isFloat(nbToCheck):
-	try:
-		float(nbToCheck)
-	except ValueError:
-		return False
-	return True
 
 def parse(filename):
     code = [line.split(':') for line in open(filename)]
@@ -170,8 +164,6 @@ def execute(code, adresses):
         else:
             print ("Uknown opcode %r. Stopping here." % mnemo)
             break
-        
-
         ip += 1
         
 if __name__ == '__main__':
