@@ -1,11 +1,17 @@
-while(4<=6){
+let a = 2
+var b = 1
+while(a<=6 && b<4){
+    a++
     log(5);
 }
 
-while(2==9)
+while(2==9 || 1<a)
 {
+    a--;
+    continue;
+    log(2)
     continue;
 }
 
-while(7>1)
-    log(7);
+while(a>1)
+    a--;
