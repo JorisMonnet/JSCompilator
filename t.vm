@@ -1,6 +1,0 @@
-func1: PUSHC 666.0
-PRINT
-EF
-PUSHC 3.0
-PRINT
-JMP func1

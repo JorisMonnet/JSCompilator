@@ -1,6 +1,0 @@
-JMP cond1
-body1: JMP cond1
-cond1: PUSHC 1
-JINZ body1
-PUSHC 6.0
-PRINT
