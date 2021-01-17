@@ -1,11 +1,159 @@
-
-function plusUn(data){
-    return(data+1)
+if(2<5){
+    log(2)
+} else if (1==5){
+    log(3)
+} else {
+    log(4)
 }
 
-var origin=10
-for(let i=0;i<10;i++){
-    let res=plusUn(origin)
-    log(res)
-    origin--
+if(2<5)
+    log(2)
+else if (1==5)
+    log(3)
+else
+    log(4)
+
+if(2<5){
+    log(2)
+} else if (1==5)
+    log(3)
+else {
+    log(4)
 }
+
+
+if(! 5<2){
+    log(5)
+    let a=5;
+    switch(a){
+        case 1: log(1)
+            break
+        case 2: log(2);
+            break;
+        default : log(999)
+}
+}
+function f(){
+    return 4
+}
+
+let aa = 5;
+var k = (aa==5)?2:3;
+let cc = aa===9?[aa,r,te,iop]:4
+let r = aa<5 || k>8 ? f():0;
+
+var ab = 1;
+let bb = 0
+var cb = [1,2,5,6,3]
+var db = []
+let eb = [ab,rb,t,e]
+var fb = ab
+let gb = ab*786
+let hb = ab+8;
+
+function a(b){
+    return b
+}
+
+var z = a(0)
+
+while(4<=6){
+    log(5);
+}
+
+while(2==9)
+{
+    continue;
+}
+
+while(7>1)
+    log(7);
+
+
+var ac = []
+var bc = [ac,d,f,s,p]
+log(bc[0])
+log(bc[4])
+
+
+while(4<5)
+    break;
+
+log(6)
+
+for(let i =0;i<89;i++)
+    continue
+
+for(let i =0;i<89;i++){
+    if(i/2==0){
+        continue
+        }else{
+        break
+        }
+}
+
+
+do 
+    log(4)
+while(1<5)
+
+do {
+    log(5)
+    log(6)
+    break
+} while(1==9)
+
+
+var ad = 1;
+ad+=6
+ad*=8
+ad/=23
+ad-=45
+ad+=-45
+ad++
+ad--
+
+
+
+for(let a = 5;a<50;a++){
+    log(2)
+}
+for(let b = 5;b==200*9;b+=6)
+{
+    log(2)
+}
+for(let b = 5;b==200*9;b+=6)
+{
+    log(2)
+}
+for(let c = 5;c>50&&c<150;c--)
+    log(2)
+
+let d = 0
+for(d=1;d<2;d+=0.041){
+    log(456)
+}
+var ae = 5
+log(ae)
+
+
+let af=[a,r,f,4,5,6];
+
+function ag(arg1){
+    log(arg1)
+}
+
+function bLog(a){
+    log(4)
+}
+
+function getPi(){
+    return 3.1415926
+}
+
+var g = getPi()
+var c = 0
+
+bLog(2)
+
+c = getPi()

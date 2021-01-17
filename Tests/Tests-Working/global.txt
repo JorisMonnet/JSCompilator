@@ -39,7 +39,7 @@ function f(){
 
 let aa = 5;
 var k = (aa==5)?2:3;
-let c = aa===9?[aa,r,te,iop]:4
+let cc = aa===9?[aa,r,te,iop]:4
 let r = aa<5 || k>8 ? f():0;
 
 var ab = 1;
@@ -87,8 +87,7 @@ for(let i =0;i<89;i++)
 for(let i =0;i<89;i++){
     if(i/2==0){
         continue
-        }
-    else{
+        }else{
         break
         }
 }
