@@ -158,6 +158,11 @@ def execute(code, adresses):
                 continue     
         elif mnemo == "BREAK":
             continue
+        elif mnemo =="VOID":
+            try:
+                code[ip+1][0]
+            except :
+                break
         # Fallback
         else:
             print ("Uknown opcode %r. Stopping here." % mnemo)

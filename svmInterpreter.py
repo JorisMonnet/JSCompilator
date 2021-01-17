@@ -133,8 +133,23 @@ def compile(self):
 @addToClass(AST.IfNode)
 def compile(self):
 	counter = condcounter()
-	bytecode = ""
-	bytecode =f"cond{counter}: "
+	bytecode = self.children[0].compile()
+	bytecode +="JMP cond%s\n" % counter 
+	bytecode += "bodyThen%s: " % counter 
+	bytecode += self.children[1].compile()
+	bytecode +="JMP endif%s\n" % counter
+	if len(self.children)>2:
+		bytecode += "bodyElse%s: " % counter 
+		bytecode += self.children[2].compile()
+		bytecode +="JMP endif%s\n "% counter
+	bytecode += "cond%s: " % counter
+	bytecode += self.children[1].compile() 
+	bytecode += "JINZ bodyThen%s\n" % counter
+	bytecode += "cond%s: " % counter
+	bytecode += self.children[1].compile() 
+	bytecode += "JIZ bodyElse%s\n" % counter
+	bytecode += "endif%s: VOID\n" % counter
+	return bytecode
 
 @addToClass(AST.ElseNode)
 def compile(self):
@@ -242,7 +257,7 @@ def compile(self):
 @addToClass(AST.NotNode)
 def compile(self):
 	bytecode = self.children[0].compile()
-	bytecode+="NOT"
+	bytecode+="NOT\n"
 	return bytecode
 
 ####################################################################################################################

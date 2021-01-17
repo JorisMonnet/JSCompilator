@@ -1,16 +1,155 @@
 PUSHC 5.0
 SET a
 PUSHC 2.0
-PRINT
-PUSHC 4.0
-PRINT
-PUSHC 2.0
-PRINT
 PUSHC 5.0
+COND_OP <
+JMP cond1
+bodyThen1: PUSHC 2.0
 PRINT
-PUSHC 6.0
+JMP endif1
+bodyElse1: PUSHC 5.0
+PUSHC 5.0
+COND_OP ==
+JMP cond2
+bodyThen2: PUSHC 3.0
 PRINT
+JMP endif2
+bodyElse2: PUSHC 4.0
+PRINT
+JMP endif2
+ cond2: PUSHC 3.0
+PRINT
+JINZ bodyThen2
+cond2: PUSHC 3.0
+PRINT
+JIZ bodyElse2
+endif2: VOID
+JMP endif1
+ cond1: PUSHC 2.0
+PRINT
+JINZ bodyThen1
+cond1: PUSHC 2.0
+PRINT
+JIZ bodyElse1
+endif1: VOID
 PUSHC 7.0
+PUSHC 5.0
+COND_OP <
+JMP cond3
+bodyThen3: PUSHC 2.0
 PRINT
-PUSHC 8.0
+JMP endif3
+bodyElse3: PUSHC 1.0
+PUSHC 5.0
+COND_OP ==
+JMP cond4
+bodyThen4: PUSHC 3.0
 PRINT
+JMP endif4
+bodyElse4: PUSHC 4.0
+PRINT
+JMP endif4
+ cond4: PUSHC 3.0
+PRINT
+JINZ bodyThen4
+cond4: PUSHC 3.0
+PRINT
+JIZ bodyElse4
+endif4: VOID
+JMP endif3
+ cond3: PUSHC 2.0
+PRINT
+JINZ bodyThen3
+cond3: PUSHC 2.0
+PRINT
+JIZ bodyElse3
+endif3: VOID
+PUSHC 2.0
+PUSHC 5.0
+COND_OP <
+JMP cond5
+bodyThen5: PUSHC 2.0
+PRINT
+JMP endif5
+bodyElse5: PUSHC 1.0
+PUSHC 5.0
+COND_OP ==
+JMP cond6
+bodyThen6: PUSHC 3.0
+PRINT
+JMP endif6
+bodyElse6: PUSHC 4.0
+PRINT
+JMP endif6
+ cond6: PUSHC 3.0
+PRINT
+JINZ bodyThen6
+cond6: PUSHC 3.0
+PRINT
+JIZ bodyElse6
+endif6: VOID
+JMP endif5
+ cond5: PUSHC 2.0
+PRINT
+JINZ bodyThen5
+cond5: PUSHC 2.0
+PRINT
+JIZ bodyElse5
+endif5: VOID
+PUSHC 5.0
+PUSHC 2.0
+COND_OP <
+NOT
+JMP cond7
+bodyThen7: PUSHC 5.0
+PRINT
+JMP endif7
+cond7: PUSHC 5.0
+PRINT
+JINZ bodyThen7
+cond7: PUSHC 5.0
+PRINT
+JIZ bodyElse7
+endif7: VOID
+PUSHC 1.0
+PUSHC 5.0
+COND_OP <
+JMP cond8
+bodyThen8: PUSHC 6.0
+PRINT
+JMP endif8
+cond8: PUSHC 6.0
+PRINT
+JINZ bodyThen8
+cond8: PUSHC 6.0
+PRINT
+JIZ bodyElse8
+endif8: VOID
+PUSHC 1.0
+PUSHC 5.0
+COND_OP <
+JMP cond9
+bodyThen9: PUSHC 7.0
+PRINT
+JMP endif9
+cond9: PUSHC 7.0
+PRINT
+JINZ bodyThen9
+cond9: PUSHC 7.0
+PRINT
+JIZ bodyElse9
+endif9: VOID
+PUSHC 1.0
+PUSHC 5.0
+COND_OP <
+JMP cond10
+bodyThen10: PUSHC 8.0
+PRINT
+JMP endif10
+cond10: PUSHC 8.0
+PRINT
+JINZ bodyThen10
+cond10: PUSHC 8.0
+PRINT
+JIZ bodyElse10
+endif10: VOID
