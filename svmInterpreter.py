@@ -124,10 +124,10 @@ def compile(self):
 @addToClass(AST.ForNode)
 def compile(self):
 	bytecode = ""
-	bytecode += self.children[0].compile
-	bytecode += self.children[1].compile
-	bytecode += self.children[2].compile
-	bytecode += self.children[3].compile
+	bytecode += self.children[0].compile()
+	bytecode += self.children[1].compile()
+	bytecode += self.children[2].compile()
+	bytecode += self.children[3].compile()
 	return bytecode
 
 @addToClass(AST.StartForNode)
@@ -190,8 +190,7 @@ def compile(self):
 
 @addToClass(AST.ContinueNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return f"JMP cond{condcounter()-1}\n"
 
 ####################################################################################################################
 
