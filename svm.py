@@ -125,7 +125,8 @@ def execute(code, adresses):
             if cond == 0:
                 ip = adresses[code[ip][1]]
                 continue     
-            
+        elif mnemo == "BREAK":
+            ip+=1
         # Fallback
         else:
             print ("Uknown opcode %r. Stopping here." % mnemo)

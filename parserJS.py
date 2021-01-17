@@ -47,7 +47,7 @@ def p_newline_program(p):
     p[0] = p[2]
 
 def p_program(p):
-    ''' program : statement  ';' 
+    ''' program : statement  ';' NEWLINE
     | statement NEWLINE ''' 
     p[0] = AST.ProgramNode(p[1])
 
