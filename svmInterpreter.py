@@ -1,4 +1,4 @@
-import AST
+import AST,re
 from AST import addToClass
 
 operations = {
@@ -6,6 +6,13 @@ operations = {
 	'-' : 'SUB',
 	'*' : 'MUL',
 	'/' : 'DIV'
+}
+
+operationsLambda = {
+	'ADD' : lambda x,y: x+y,
+	'SUB' : lambda x,y: x-y,
+	'MUL' : lambda x,y: x*y,
+	'DIV' : lambda x,y: x/y 
 }
 
 varValues = {} # varName : Value -> scope managed in parser
@@ -21,6 +28,13 @@ def functioncounter():
 	return functioncounter.current
 
 functioncounter.current = 0
+
+def isFloat(nbToCheck):
+	try:
+		float(nbToCheck)
+	except ValueError:
+		return False
+	return True
 
 #program
 @addToClass(AST.ProgramNode)
@@ -90,13 +104,13 @@ def compile(self):
 
 @addToClass(AST.AssignNode)
 def compile(self):
-	bytecode = self.children[1].compile()
-	bytecode += "SET %s\n" % self.children[0].tok
-	if self.children[1].type == 'FunctionCall':
-		pass#varValues[self.children[0].tok] = self.children[1].children[0].
-	else:
-		pass#varValues[self.children[0].tok] = self.children[1].tok
-	return bytecode
+	search = re.search('\d+',self.children[1].compile())
+	if search:
+		varValues[self.children[0].tok] = search.group(0)
+		bytecode = self.children[1].compile()
+		bytecode += "SET %s\n" % self.children[0].tok
+		return bytecode
+	else : return ""
 
 @addToClass(AST.VariableNode)
 def compile(self):
@@ -218,8 +232,31 @@ dicConditions = {
 
 @addToClass(AST.ConditionNode)
 def compile(self):
-	firstValue = self.children[0].tok if str(int(self.children[0].tok))==self.children[0].tok else varValues[self.children[0].tok]
-	secondValue = self.children[2].tok if str(int(self.children[2].tok))==self.children[2].tok else varValues[self.children[1].tok]
+	firstValue 	= None
+	
+	if hasattr(self.children[0],'tok') and isFloat(self.children[0].tok):
+		firstValue 	= self.children[0].tok 
+	elif hasattr(self.children[0],'tok') :
+		firstValue = varValues[self.children[0].tok]
+	else :
+		firstValue = self.children[0].compile()
+	
+	secondValue = None
+
+	if hasattr(self.children[2],'tok') and isFloat(self.children[2].tok):
+		secondValue = self.children[2].tok 
+	elif hasattr(self.children[2],'tok') :
+		secondValue = varValues[self.children[2].tok]
+	else :
+		compiledChildren = self.children[2].compile()
+		search = re.search('\d+',compiledChildren)
+		searchOperation = re.search('["ADD","MUL","DIV","SUB"]',compiledChildren)
+		if search and len(search.group())>1:
+			secondValue = operationsLambda[searchOperation.group(0)](float(search.group(0)),float(search.group(1)))
+		elif search :
+			secondValue = -float(search.group(0))
+		else :
+			pass #arrayValue
 	return "PUSHC " + str(dicConditions[self.children[1].tok](int(firstValue),int(secondValue)))+"\n"
 
 @addToClass(AST.AndNode)
