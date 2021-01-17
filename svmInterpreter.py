@@ -15,13 +15,22 @@ operationsLambda = {
 	'DIV' : lambda x,y: x/y 
 }
 
+
 varValues = {} # varName : Value -> scope managed in parser
+funcStorage={}
 
 def condcounter():
 	condcounter.current += 1
 	return condcounter.current
 
 condcounter.current = 0
+
+
+def funcVarCounter():
+	funcVarCounter.current += 1
+	return funcVarCounter.current
+
+funcVarCounter.current = 0
 
 def functioncounter():
 	functioncounter.current += 1
@@ -49,15 +58,26 @@ def compile(self):
 
 ####################################################################################################################
 
-###################################################### FUNCTION ####################################################
+###################################################### FUNCTIONS ###################################################
+
+
 
 @addToClass(AST.FunctionNode)
 def compile(self):
 	fcounter = functioncounter()
-	bytecode = "func%s: \n" % fcounter
-	bytecode += self.children[1].compile()
-	bytecode += self.children[2].compile()	
-	bytecode += "JINZ func%s\n" % fcounter
+	bytecode=""
+	funcStorage[self.children[0].tok]=fcounter
+	if type(self.children[1])=="ArgNode":
+		counter=funcVarCounter()
+		fcounter = functioncounter()
+		bytecode = "func%s: " % fcounter
+		bytecode+=self.children[1].compile(counter)
+		bytecode += self.children[2].compile()	
+		bytecode+="EF\n"
+	else :
+		bytecode = "func%s: " % fcounter
+		bytecode += self.children[2].compile()
+		bytecode+="EF\n"
 	return bytecode
 
 @addToClass(AST.ReturnNode)
@@ -67,16 +87,19 @@ def compile(self):
 	return bytecode
 
 @addToClass(AST.ArgNode)
-def compile(self):
+def compile(self,counter):
 	bytecode = ""
-	if( isinstance(self.children[0].tok, str) and self.children[0].tok != "No Arguments"):
-		bytecode += "PUSHV %s\n" % self.children[0].tok
+	if counter :
+		bytecode += "PUSHC %s" % self.children[0].tok
+		bytecode+="SET funcVar"+counter+"\n"
 	return bytecode
 
 @addToClass(AST.FunctionCallNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	if(type(self.children[0])=="ArgNode"):
+		return f"JMP func{funcStorage[self.children[1].children[0].tok]}\n" 
+	else:
+		return f"JMP func{funcStorage[self.children[0].children[0].tok]}\n"
 
 ####################################################################################################################
 

@@ -1,11 +1,6 @@
-
-
-var a=1
-
-while(a<=6){
-    log(a)
-    a*=2
-    if(a>18){
-        break;
-    }
+function sheitan(){
+    log(666)
 }
+
+log(3)
+sheitan();

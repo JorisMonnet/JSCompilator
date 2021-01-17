@@ -157,6 +157,9 @@ def execute(code, adresses):
                 continue     
         elif mnemo == "BREAK":
             ip+=1
+        elif mnemo=="EF":
+            ip = adresses[code[ip-1 if ip >2 else ip  ][1]]
+            continue
         # Fallback
         else:
             print ("Uknown opcode %r. Stopping here." % mnemo)
