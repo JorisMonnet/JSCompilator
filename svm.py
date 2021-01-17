@@ -51,6 +51,22 @@ The format of svm's "bytecode" is the following:
     
     SVM v0.1 - Matthieu Amiguet/HE-Arc, 2008
 """
+dicConditions = {
+	'<' 	: lambda x,y : int(x < y),
+	'>' 	: lambda x,y : int(x > y),
+	'<=' 	: lambda x,y : int(x <= y),
+	'>=' 	: lambda x,y : int(x >= y),
+	'===' 	: lambda x,y : int(x == y and type(y)==type(x)),
+	'!==' 	: lambda x,y : int(x != y or type(y)!=type(x)),
+	'==' 	: lambda x,y : int(x == y),
+	'!=' 	: lambda x,y : int(x != y)
+}
+def isFloat(nbToCheck):
+	try:
+		float(nbToCheck)
+	except ValueError:
+		return False
+	return True
 
 def parse(filename):
     code = [line.split(':') for line in open(filename)]
@@ -77,7 +93,6 @@ def execute(code, adresses):
     nb_instr = len(code)
     while ip < nb_instr:
         mnemo = code[ip][0]
-        
         # Stack and memory manipulation
         if mnemo == "PUSHC":
             sappend(float(code[ip][1]))
@@ -110,7 +125,22 @@ def execute(code, adresses):
             sappend(val1/val2)    
         elif mnemo =="USUB":
             stack[-1] = -stack[-1]
-            
+        
+        #conditions
+        elif mnemo == "COND_OP":
+            val2 = spop()
+            val1 = spop()
+            sappend(dicConditions[code[ip][1]](val1,val2))
+        elif mnemo == "OR":
+            val2 = spop()
+            val1 = spop()
+            sappend(val1 or val2)
+        elif mnemo =="AND":
+            val2 = spop()
+            val1 = spop()
+            sappend(val1 and val2)
+        elif mnemo =="NOT":
+            stack[-1] = str(not int(stack[-1]))
         # (un)conditional jumps
         elif mnemo == "JMP":
             ip = adresses[code[ip][1]]

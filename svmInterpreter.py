@@ -29,13 +29,6 @@ def functioncounter():
 
 functioncounter.current = 0
 
-def isFloat(nbToCheck):
-	try:
-		float(nbToCheck)
-	except ValueError:
-		return False
-	return True
-
 #program
 @addToClass(AST.ProgramNode)
 def compile(self):
@@ -48,7 +41,7 @@ def compile(self):
 @addToClass(AST.TokenNode)
 def compile(self):
 	bytecode = ""
-	if isinstance(self.tok, str):
+	if isinstance(self.tok, str) and self.tok !="1":
 		bytecode += "PUSHV %s\n" % self.tok
 	else:
 		bytecode += "PUSHC %s\n" % self.tok
@@ -139,6 +132,7 @@ def compile(self):
 
 @addToClass(AST.IfNode)
 def compile(self):
+	print(self.children[0].compile())
 	if int(self.children[0].compile()[-2]):
 		return self.children[1].compile()
 	if len(self.children) > 2 :
@@ -189,7 +183,6 @@ def compile(self):
 def compile(self):
 	if len(self.children)==2 and self.children[1].type=='Token':return "" #void switch
 	for children in self.children[1:]:
-		print(varValues)
 		if children.type !='Default' and float(children.children[0].tok) == varValues[self.children[0].tok]:
 			return children.compile()
 	for children in self.children[1:]:
@@ -228,66 +221,32 @@ def compile(self):
 
 ############################################ CONDITIONS ############################################################
 
-dicConditions = {
-	'<' 	: lambda x,y : int(x < y),
-	'>' 	: lambda x,y : int(x > y),
-	'<=' 	: lambda x,y : int(x <= y),
-	'>=' 	: lambda x,y : int(x >= y),
-	'===' 	: lambda x,y : int(x == y and type(y)==type(x)),
-	'!==' 	: lambda x,y : int(x != y or type(y)!=type(x)),
-	'==' 	: lambda x,y : int(x == y),
-	'!=' 	: lambda x,y : int(x != y)
-}
-
 @addToClass(AST.ConditionNode)
 def compile(self):
-	firstValue 	= None
+	bytecode = self.children[0].compile()
+	bytecode += self.children[2].compile()
+	bytecode += f"COND_OP {self.children[1].tok}\n"
+	return bytecode
 	
-	if hasattr(self.children[0],'tok') and isFloat(self.children[0].tok):
-		firstValue 	= self.children[0].tok 
-	elif hasattr(self.children[0],'tok') :
-		firstValue = varValues[self.children[0].tok]
-	else :
-		firstValue = self.children[0].compile()
-	
-	secondValue = None
-
-	if hasattr(self.children[2],'tok') and isFloat(self.children[2].tok):
-		secondValue = self.children[2].tok 
-	elif hasattr(self.children[2],'tok') :
-		secondValue = varValues[self.children[2].tok]
-	else :
-		compiledChildren = self.children[2].compile()
-		search = re.search('\d+',compiledChildren)
-
-		searchOperation = 'ADD' if compiledChildren.find('ADD') else \
-						'MUL' if compiledChildren.find('MUL') else \
-						'DIV' if compiledChildren.find('DIV') else \
-						'SUB' if compiledChildren.find('SUB') else ""
-		if search :
-			try:
-				secondValue = operationsLambda[searchOperation](float(search.group(0)),float(search.group(1)))
-			except IndexError:
-				secondValue = -float(search.group(0))
-		else :
-			pass #arrayValue
-	return "PUSHC " + str(dicConditions[self.children[1].tok](int(firstValue),int(secondValue)))+"\n"
-
 @addToClass(AST.AndNode)
 def compile(self):
-	children1Code = int(self.children[0].compile()[-2]) 	#get 0 or 1		[-1]="\n"
-	children2Code = int(self.children[1].compile()[-2])
-	return "PUSHC " + str(int(children1Code and children2Code)) + "\n"
+	bytecode = self.children[0].compile()
+	bytecode+= self.children[1].compile()
+	bytecode+="AND\n"
+	return bytecode
 
 @addToClass(AST.OrNode)
 def compile(self):
-	children1Code = int(self.children[0].compile()[-2])
-	children2Code = int(self.children[1].compile()[-2])
-	return "PUSHC " + str(int(children1Code or children2Code)) + "\n"
+	bytecode = self.children[0].compile()
+	bytecode+= self.children[1].compile()
+	bytecode+="OR\n"
+	return bytecode
 
 @addToClass(AST.NotNode)
 def compile(self):
-	return "PUSHC " + str(int(not int(self.children[0].compile()[-2]) ))+"\n"
+	bytecode = self.children[0].compile()
+	bytecode+="NOT"
+	return bytecode
 
 ####################################################################################################################
 
