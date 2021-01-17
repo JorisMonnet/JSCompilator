@@ -61,8 +61,7 @@ def compile(self):
 @addToClass(AST.FunctionNode)
 def compile(self):
 	fcounter = functioncounter()
-	bytecode = ""
-	bytecode += "func%s: \n" % fcounter
+	bytecode = "func%s: \n" % fcounter
 	bytecode += self.children[1].compile()
 	bytecode += self.children[2].compile()	
 	bytecode += "JINZ func%s\n" % fcounter
@@ -104,24 +103,34 @@ def compile(self):
 
 @addToClass(AST.AssignNode)
 def compile(self):
-	search = re.search('\d+',self.children[1].compile())
+	compiledChildren = self.children[1].compile()
+	search = re.search("\d+",compiledChildren)
 	if search:
-		varValues[self.children[0].tok] = search.group(0)
-		bytecode = self.children[1].compile()
-		bytecode += "SET %s\n" % self.children[0].tok
-		return bytecode
-	else : return ""
+		if self.children[1].__class__.__name__!="OpNode": 
+			varValues[self.children[0].tok] = float(search.group(0))
+		else:
+			searchOperation = 	'ADD' if compiledChildren.find('ADD') else \
+								'MUL' if compiledChildren.find('MUL') else \
+								'DIV' if compiledChildren.find('DIV') else \
+								'SUB' if compiledChildren.find('SUB') else ""
+			try:
+				varValues[self.children[0].tok] = operationsLambda[searchOperation](float(search.group(0)),float(search.group(1)))
+			except IndexError:
+				varValues[self.children[0].tok] = -float(search.group(0))
+	else:
+		raise Exception("Error on assignation")
+
+	bytecode = compiledChildren
+	bytecode += "SET %s\n" % self.children[0].tok
+	return bytecode
 
 @addToClass(AST.VariableNode)
 def compile(self):
-	varValues[self.children[0].tok] = None
 	return "" 
 
 @addToClass(AST.ArrayNode)
 def compile(self):
-	bytecode = ""
-	bytecode += "PUSHV %s\n" % self.children[0].compile
-	return bytecode
+	return ""
 
 ####################################################################################################################
 
@@ -131,10 +140,10 @@ def compile(self):
 @addToClass(AST.IfNode)
 def compile(self):
 	if int(self.children[0].compile()[-2]):
-		ifIsTrue = True
 		return self.children[1].compile()
 	if len(self.children) > 2 :
 		return self.children[2].compile()
+	return ""
 
 @addToClass(AST.ElseNode)
 def compile(self):
@@ -180,7 +189,8 @@ def compile(self):
 def compile(self):
 	if len(self.children)==2 and self.children[1].type=='Token':return "" #void switch
 	for children in self.children[1:]:
-		if children.type !='Default' and children.children[0] == self.children[0]:
+		print(varValues)
+		if children.type !='Default' and float(children.children[0].tok) == varValues[self.children[0].tok]:
 			return children.compile()
 	for children in self.children[1:]:
 		if children.type =='Default':
@@ -208,8 +218,7 @@ def compile(self):
 
 @addToClass(AST.BreakNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	return "BREAK\n"
 
 @addToClass(AST.ContinueNode)
 def compile(self):

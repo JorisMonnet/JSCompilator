@@ -32,3 +32,38 @@ switch(a){
 }
 
 switch(a){}
+
+a=1
+switch(a){
+    case 1: log(1)
+        break
+    case 2: log(2)
+        break
+        
+    default : log(999)
+}
+switch(a){
+    case 1: log(1);
+        break;
+    case 2: log(2);break;
+    default : log(999);
+}
+
+switch(a){
+    case 1: log(1);
+        break;
+
+
+
+
+
+
+
+        
+    case 2: log(2);
+        break;
+
+    default : log(999)
+}
+
+switch(a){}

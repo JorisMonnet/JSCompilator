@@ -2,7 +2,10 @@
 
 var a=1
 
-while(2<=6){
-    log(41)
+while(a<=6){
+    log(a)
     a*=2
+    if(a>18){
+        break;
+    }
 }
