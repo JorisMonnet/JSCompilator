@@ -250,11 +250,16 @@ def compile(self):
 	else :
 		compiledChildren = self.children[2].compile()
 		search = re.search('\d+',compiledChildren)
-		searchOperation = re.search('["ADD","MUL","DIV","SUB"]',compiledChildren)
-		if search and len(search.group())>1:
-			secondValue = operationsLambda[searchOperation.group(0)](float(search.group(0)),float(search.group(1)))
-		elif search :
-			secondValue = -float(search.group(0))
+
+		searchOperation = 'ADD' if compiledChildren.find('ADD') else \
+						'MUL' if compiledChildren.find('MUL') else \
+						'DIV' if compiledChildren.find('DIV') else \
+						'SUB' if compiledChildren.find('SUB') else ""
+		if search :
+			try:
+				secondValue = operationsLambda[searchOperation](float(search.group(0)),float(search.group(1)))
+			except IndexError:
+				secondValue = -float(search.group(0))
 		else :
 			pass #arrayValue
 	return "PUSHC " + str(dicConditions[self.children[1].tok](int(firstValue),int(secondValue)))+"\n"
