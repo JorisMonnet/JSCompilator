@@ -141,6 +141,7 @@ def execute(code, adresses):
             sappend(val1 and val2)
         elif mnemo =="NOT":
             stack[-1] = str(not int(stack[-1]))
+
         # (un)conditional jumps
         elif mnemo == "JMP":
             ip = adresses[code[ip][1]]
@@ -156,7 +157,7 @@ def execute(code, adresses):
                 ip = adresses[code[ip][1]]
                 continue     
         elif mnemo == "BREAK":
-            ip+=1
+            continue
         elif mnemo=="EF":
             ip = adresses[code[ip-1 if ip >2 else ip  ][1]]
             continue

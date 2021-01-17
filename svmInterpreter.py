@@ -155,12 +155,9 @@ def compile(self):
 
 @addToClass(AST.IfNode)
 def compile(self):
-	print(self.children[0].compile())
-	if int(self.children[0].compile()[-2]):
-		return self.children[1].compile()
-	if len(self.children) > 2 :
-		return self.children[2].compile()
-	return ""
+	counter = condcounter()
+	bytecode = ""
+	bytecode =f"cond{counter}: "
 
 @addToClass(AST.ElseNode)
 def compile(self):
@@ -170,14 +167,14 @@ def compile(self):
 def compile(self):
 	counter = condcounter() 
 	bytecode = self.children[0].compile()
-	bytecode += "JMP cond%s\n" % counter 
+	bytecode +="JMP cond%s\n" % counter 
 	bytecode += "body%s: " % counter 
 	bytecode += self.children[2].compile()
 	bytecode += self.children[3].compile() 
 	bytecode += "cond%s: " % counter
 	bytecode += self.children[1].compile() 
 	bytecode += "JINZ body%s\n" % counter 
-	return bytecode
+	return bytecode	
 
 @addToClass(AST.StartForNode)
 def compile(self):
