@@ -8,6 +8,8 @@ operations = {
 	'/' : 'DIV'
 }
 
+varValues = {} # varName : Value -> scope managed in parser
+
 def condcounter():
 	condcounter.current += 1
 	return condcounter.current
@@ -88,15 +90,18 @@ def compile(self):
 
 @addToClass(AST.AssignNode)
 def compile(self):
-	bytecode = ""
-	bytecode += self.children[1].compile()
+	bytecode = self.children[1].compile()
 	bytecode += "SET %s\n" % self.children[0].tok
+	if self.children[1].type == 'FunctionCall':
+		pass#varValues[self.children[0].tok] = self.children[1].children[0].
+	else:
+		pass#varValues[self.children[0].tok] = self.children[1].tok
 	return bytecode
 
 @addToClass(AST.VariableNode)
 def compile(self):
-	bytecode = ""
-	return bytecode
+	varValues[self.children[0].tok] = None
+	return "" 
 
 @addToClass(AST.ArrayNode)
 def compile(self):
@@ -119,15 +124,19 @@ def compile(self):
 
 @addToClass(AST.ElseNode)
 def compile(self):
-	return  self.children[0].compile()
+	return self.children[0].compile()
 
 @addToClass(AST.ForNode)
 def compile(self):
-	bytecode = ""
-	bytecode += self.children[0].compile()
-	bytecode += self.children[1].compile()
+	counter = condcounter() 
+	bytecode = self.children[0].compile()
+	bytecode += "JMP cond%s\n" % counter 
+	bytecode += "body%s: " % counter 
 	bytecode += self.children[2].compile()
-	bytecode += self.children[3].compile()
+	bytecode += self.children[3].compile() 
+	bytecode += "cond%s: " % counter
+	bytecode += self.children[1].compile() 
+	bytecode += "JINZ body%s\n" % counter 
 	return bytecode
 
 @addToClass(AST.StartForNode)
@@ -209,11 +218,13 @@ dicConditions = {
 
 @addToClass(AST.ConditionNode)
 def compile(self):
-	return "PUSHC " + str(dicConditions[self.children[1].tok](int(self.children[0].tok),int(self.children[2].tok)))+"\n"
+	firstValue = self.children[0].tok if str(int(self.children[0].tok))==self.children[0].tok else varValues[self.children[0].tok]
+	secondValue = self.children[2].tok if str(int(self.children[2].tok))==self.children[2].tok else varValues[self.children[1].tok]
+	return "PUSHC " + str(dicConditions[self.children[1].tok](int(firstValue),int(secondValue)))+"\n"
 
 @addToClass(AST.AndNode)
 def compile(self):
-	children1Code = int(self.children[0].compile()[-2]) #get 0 or 1
+	children1Code = int(self.children[0].compile()[-2]) 	#get 0 or 1		[-1]="\n"
 	children2Code = int(self.children[1].compile()[-2])
 	return "PUSHC " + str(int(children1Code and children2Code)) + "\n"
 
